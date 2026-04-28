@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #f5f2eb;
+    --surface: #fdfcf8;
+    --border: #d8d0c0;
+    --text: #1c1a16;
+    --text-muted: #6b6355;
+    --primary: #2c5f8a;
+    --primary-light: #e8f0f8;
+    --gold: #b8860b;
+    --accent: #8b2c2c;
+  }
+
+  body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  h1,h2,h3,h4 { font-family: 'Libre Baskerville', Georgia, 'Times New Roman', serif; }
+  code, pre { font-family: 'Source Code Pro', 'Courier New', monospace; }
+
+  /* Scrollbar clásico */
+  ::-webkit-scrollbar { width: 7px; height: 7px; }
+  ::-webkit-scrollbar-track { background: #ece8df; }
+  ::-webkit-scrollbar-thumb { background: #b0a898; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8a7e6e; }
+}
+
+@layer components {
+  /* Cards — aspecto papel con borde sutil */
+  .card {
+    @apply bg-stone-50 rounded-sm shadow-card border border-stone-200 p-6;
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-md hover:-translate-y-px cursor-pointer;
+  }
+
+  /* Buttons — estilo clásico sobrio */
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-sm font-medium text-sm
+           tracking-wide transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-navy-700 text-stone-50 hover:bg-navy-800 active:scale-95 shadow-sm border border-navy-800;
+  }
+  .btn-secondary {
+    @apply btn bg-stone-100 text-stone-700 hover:bg-stone-200 active:scale-95 border border-stone-300;
+  }
+  .btn-gold {
+    @apply btn bg-gold-700 text-white hover:bg-gold-800 active:scale-95 shadow-sm border border-gold-800;
+  }
+  .btn-danger {
+    @apply btn bg-red-700 text-white hover:bg-red-800 active:scale-95 border border-red-800;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-stone-600 hover:bg-stone-100;
+  }
+  .btn-outline {
+    @apply btn border border-stone-400 text-stone-700 hover:border-navy-600 hover:text-navy-700;
+  }
+
+  /* Inputs — clásico con borde definido */
+  .input {
+    @apply w-full px-3 py-2 rounded-sm border border-stone-300 bg-white text-sm
+           focus:outline-none focus:ring-1 focus:ring-navy-500 focus:border-navy-500
+           placeholder:text-stone-400 transition-all;
+  }
+  .input-error { @apply border-red-400 focus:ring-red-400; }
+  .label { @apply block text-sm font-semibold text-stone-700 mb-1.5 tracking-wide; }
+
+  /* Badges — píldoras menos redondeadas */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold tracking-wide;
+  }
+  .badge-blue   { @apply badge bg-blue-100 text-blue-800 border border-blue-200; }
+  .badge-green  { @apply badge bg-emerald-100 text-emerald-800 border border-emerald-200; }
+  .badge-yellow { @apply badge bg-amber-100 text-amber-800 border border-amber-200; }
+  .badge-red    { @apply badge bg-red-100 text-red-800 border border-red-200; }
+  .badge-purple { @apply badge bg-purple-100 text-purple-800 border border-purple-200; }
+  .badge-gray   { @apply badge bg-stone-100 text-stone-600 border border-stone-200; }
+
+  /* Page header */
+  .page-header { @apply mb-8; }
+  .page-title {
+    @apply text-2xl font-display text-navy-900 tracking-tight;
+  }
+  .page-subtitle { @apply text-stone-500 text-sm mt-1; }
+
+  /* Stat card */
+  .stat-card { @apply card flex items-center gap-4; }
+  .stat-icon {
+    @apply w-12 h-12 rounded flex items-center justify-center flex-shrink-0;
+  }
+  .stat-value { @apply text-2xl font-bold text-navy-900; }
+  .stat-label { @apply text-sm text-stone-500; }
+
+  /* Table — aspecto registro académico */
+  .table-wrapper { @apply card p-0 overflow-hidden; }
+  .table { @apply w-full text-sm; }
+  .table th {
+    @apply px-4 py-3 text-left text-xs font-bold text-stone-600 uppercase tracking-widest
+           bg-stone-100 border-b-2 border-stone-300;
+  }
+  .table td { @apply px-4 py-3 border-b border-stone-100 text-stone-700; }
+  .table tr:last-child td { @apply border-b-0; }
+  .table tr:hover td { @apply bg-stone-50; }
+
+  /* Nav */
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium
+           text-white/60 hover:bg-white/10 hover:text-white transition-all;
+  }
+  .nav-link-active {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-semibold
+           bg-white/15 text-white;
+  }
+
+  /* Area colors — tonos académicos más sobrios */
+  .area-mat  { @apply bg-blue-50 text-blue-800 border border-blue-200; }
+  .area-lc   { @apply bg-violet-50 text-violet-800 border border-violet-200; }
+  .area-soc  { @apply bg-amber-50 text-amber-800 border border-amber-200; }
+  .area-cn   { @apply bg-teal-50 text-teal-800 border border-teal-200; }
+  .area-ing  { @apply bg-rose-50 text-rose-800 border border-rose-200; }
+
+  /* Progress bar */
+  .progress-bar { @apply h-2 rounded-none bg-stone-200 overflow-hidden; }
+  .progress-fill { @apply h-full rounded-none transition-all duration-500; }
+
+  /* Exam option */
+  .exam-option {
+    @apply flex items-start gap-3 p-4 rounded-sm border border-stone-300 bg-white
+           hover:border-navy-400 hover:bg-blue-50 cursor-pointer transition-all;
+  }
+  .exam-option-selected { @apply border-navy-600 bg-blue-50; }
+  .exam-option-correct  { @apply border-emerald-600 bg-emerald-50; }
+  .exam-option-wrong    { @apply border-red-600 bg-red-50; }
+}
+
+/* KaTeX styling */
+.katex { font-size: 1em !important; }
+
+/* Animations */
+.animate-in { animation: fadeIn 0.25s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
