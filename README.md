@@ -1,4 +1,4 @@
-> Plataforma educativa completa para preparación ICFES Saber 11 con IA generativa, OCR, analítica en tiempo real y administración docente.
+> Plataforma educativa para preparación ICFES Saber 11 con IA generativa, OCR, analítica en tiempo real y administración docente.
 
 ---
 
