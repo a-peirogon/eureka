@@ -86,8 +86,8 @@ npm run dev   # http://localhost:5173
 
 | Rol | Correo | Contraseña |
 |-----|--------|------------|
-| Docente/Admin | `docente@eureka.edu.co` | `Docente123!` |
-| Estudiante | `estudiante@eureka.edu.co` | `Estudiante123!` |
+| Docente/Admin | `docente@eureka.edu.co` | `Admin123!` |
+| Estudiante | `estudiante@eureka.edu.co` | `Admin123!` |
 | Admin | `admin@eureka.edu.co` | (bcrypt hash) |
 
 ---
