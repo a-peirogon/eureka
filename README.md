@@ -1,40 +1,6 @@
-# 🎓 ICFES Eureka — Plataforma de Simulacros Inteligentes
-
 > Plataforma educativa completa para preparación ICFES Saber 11 con IA generativa, OCR, analítica en tiempo real y administración docente.
 
 ---
-
-## 📋 Tabla de Contenidos
-
-- [Características](#características)
-- [Stack Tecnológico](#stack-tecnológico)
-- [Arquitectura](#arquitectura)
-- [Instalación rápida](#instalación-rápida)
-- [Variables de entorno](#variables-de-entorno)
-- [Credenciales demo](#credenciales-demo)
-- [Módulos del sistema](#módulos-del-sistema)
-- [API Docs](#api-docs)
-- [DevOps](#devops)
-
----
-
-## ✨ Características
-
-| Módulo | Descripción |
-|--------|-------------|
-| 🔐 **Autenticación** | JWT + refresh tokens, roles (estudiante/docente/admin) |
-| 📚 **Banco de preguntas** | CRUD completo, 5 áreas ICFES, LaTeX, imágenes |
-| 📝 **Simulacros** | Manual o automático balanceado por IA |
-| ⏱️ **Examen en vivo** | Cronómetro, navegación, guardado automático |
-| 📊 **Resultados** | Puntaje por área, revisión pregunta a pregunta |
-| 🤖 **IA Académica** | Genera, reformula, explica y clasifica preguntas |
-| 📄 **OCR + Import** | Extrae preguntas de imágenes/PDFs con pipeline IA |
-| 📈 **Analítica** | Dashboard docente con ranking, tendencias y alertas |
-| 👥 **Admin usuarios** | Gestión completa de la institución |
-
----
-
-## 🛠 Stack Tecnológico
 
 ### Frontend
 - **React 18 + TypeScript** con Vite
@@ -60,45 +26,23 @@
 
 ---
 
-## 🏗 Arquitectura
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Nginx (80/443)  ←  Rate limiting, SSL, proxy           │
-├───────────────┬─────────────────────────────────────────┤
-│  Frontend     │  Backend (FastAPI)                       │
-│  React/Vite   │  /api/auth   /api/questions              │
-│  Port 3000    │  /api/exams  /api/ai  /api/analytics     │
-└───────────────┴─────────┬────────────┬──────────────────┘
-                          │            │
-                    PostgreSQL      Redis
-                    Port 5432       Port 6379
-                          │
-                      MinIO (S3)
-                      Port 9000
-```
-
----
-
-## 🚀 Instalación rápida
 
 ### Prerrequisitos
-- Docker + Docker Compose v2
+- Docker Compose v2
 - 4 GB RAM mínimo
-- OpenAI API key (para features de IA)
+- OpenAI API key
 
-### 1. Clonar y configurar
+### 1. Clonar
 
 ```bash
-git clone https://github.com/tu-org/icfes-eureka.git
+git clone https://github.com/a-peirogon/icfes-eureka.git
 cd icfes-eureka
 
 # Configurar backend
 cp backend/.env.example backend/.env
-# Editar backend/.env — OBLIGATORIO cambiar SECRET_KEY y OPENAI_API_KEY
 ```
 
-### 2. Levantar todo con Docker Compose
+### 2. Levantar Docker
 
 ```bash
 docker compose up -d --build
@@ -138,22 +82,7 @@ npm run dev   # http://localhost:5173
 
 ---
 
-## ⚙️ Variables de entorno
-
-Archivo: `backend/.env`
-
-| Variable | Descripción | Requerida |
-|----------|-------------|-----------|
-| `SECRET_KEY` | Clave JWT (32 bytes hex) | ✅ |
-| `OPENAI_API_KEY` | API Key de OpenAI | Para IA |
-| `DATABASE_URL` | PostgreSQL async URL | ✅ |
-| `REDIS_URL` | URL de Redis | ✅ |
-| `SENTRY_DSN` | DSN de Sentry | Opcional |
-| `SMTP_HOST` | Servidor SMTP | Opcional |
-
----
-
-## 👤 Credenciales demo
+## Credenciales demo
 
 | Rol | Correo | Contraseña |
 |-----|--------|------------|
@@ -162,24 +91,6 @@ Archivo: `backend/.env`
 | Admin | `admin@eureka.edu.co` | (bcrypt hash) |
 
 ---
-
-## 📦 Módulos del sistema
-
-### Banco de preguntas
-- 5 áreas: Matemáticas, Lectura Crítica, Sociales, Ciencias Naturales, Inglés
-- Estados: borrador → aprobado → archivado
-- Soporte LaTeX para fórmulas
-- Estadísticas de uso y tasa de acierto
-- Tags y filtros avanzados
-
-### Pipeline IA / OCR
-```
-Imagen/PDF → Tesseract OCR → Limpieza texto
-→ GPT-4o-mini → Estructura preguntas
-→ Clasificación área/dificultad
-→ Borrador para revisión docente
-→ Aprobación → Banco de preguntas
-```
 
 ### Simulacros automáticos
 El sistema selecciona preguntas aprobadas aleatoriamente por área según la distribución configurada:
@@ -203,7 +114,7 @@ El sistema selecciona preguntas aprobadas aleatoriamente por área según la dis
 
 ---
 
-## 📖 API Docs
+### API Docs
 
 Una vez en ejecución:
 - **Swagger UI**: http://localhost/api/docs
@@ -213,37 +124,30 @@ Una vez en ejecución:
 ### Endpoints principales
 
 ```
-POST /api/auth/login           # Login
-POST /api/auth/register        # Registro
-POST /api/auth/refresh         # Renovar token
+POST /api/auth/login
+POST /api/auth/register 
+POST /api/auth/refresh
 
-GET  /api/questions            # Listar preguntas (paginado, filtrado)
-POST /api/questions            # Crear pregunta
-PATCH /api/questions/{id}/status # Aprobar/archivar
+GET  /api/questions 
+POST /api/questions
+PATCH /api/questions/{id}/status
 
-GET  /api/exams                # Listar simulacros
-POST /api/exams/auto           # Crear simulacro automático
-POST /api/exams/{id}/attempts  # Iniciar/reanudar intento
-POST /api/exams/{id}/attempts/{aid}/submit  # Entregar
+GET  /api/exams
+POST /api/exams/auto 
+POST /api/exams/{id}/attempts 
+POST /api/exams/{id}/attempts/{aid}/submit
 
-POST /api/ai/generate-question # Generar pregunta con IA
-POST /api/ai/ocr-import        # OCR pipeline
-POST /api/ai/explain           # Explicar respuesta
+POST /api/ai/generate-question 
+POST /api/ai/ocr-import
+POST /api/ai/explain
 
-GET  /api/analytics/student/me     # Analytics personal
-GET  /api/analytics/course/{id}    # Analytics del curso
+GET  /api/analytics/student/me
+GET  /api/analytics/course/{id}
 ```
 
 ---
 
-## 🔧 DevOps
-
-### GitHub Actions
-El pipeline CI/CD incluye:
-1. Lint y type-check (Python + TypeScript)
-2. Build del frontend
-3. Build y push de imágenes Docker a GHCR
-4. Deploy automático por SSH a producción
+## DevOps
 
 ### Observabilidad
 - **Sentry**: errores en tiempo real (`SENTRY_DSN`)
@@ -255,9 +159,3 @@ Para escalar el backend horizontalmente:
 ```bash
 docker compose up -d --scale backend=3
 ```
-
----
-
-## 📄 Licencia
-
-MIT © 2025 — Construido con ❤️ para la educación colombiana
