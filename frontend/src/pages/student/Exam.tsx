@@ -86,8 +86,18 @@ export default function StudentExam() {
 
   // Start exam on load
   useEffect(() => {
-    if (exam && !store.attemptId) startMutation.mutate()
-  }, [exam])
+    if (!exam) return
+
+      if (store.examId !== examId) {
+        store.resetExam()
+        startMutation.mutate()
+        return
+      }
+
+      if (!store.attemptId) {
+        startMutation.mutate()
+      }
+  }, [exam, examId])
 
   // Auto-save every 30s
   useEffect(() => {

@@ -54,7 +54,7 @@ export default function TeacherAnalytics() {
   return (
     <AppLayout>
       <TopHeader
-        title="Analítica del Curso"
+        title="Analíticas"
         subtitle="Desempeño y tendencias de tus estudiantes"
       />
 

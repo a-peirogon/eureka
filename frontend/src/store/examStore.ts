@@ -145,6 +145,15 @@ export const useExamStore = create<ExamStore>()(
     }),
     {
       name: 'eureka-exam-session',
+      partialize: (state) => ({
+        examId: state.examId,
+        answers: state.answers,
+        currentIndex: state.currentIndex,
+        startedAt: state.startedAt,
+        durationSec: state.durationSec,
+        finished: state.finished,
+        questions: state.questions
+      })
     }
   )
 )
