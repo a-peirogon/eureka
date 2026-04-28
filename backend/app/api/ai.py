@@ -1,5 +1,4 @@
 import json
-import base64
 from typing import Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -11,7 +10,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.domain.models import (
     Question, QuestionOption, QuestionStatus, QuestionArea,
-    AIJob, AIJobType, AIJobStatus, User, UserRole, Tag, QuestionTag
+    AIJob, AIJobType, AIJobStatus, User, UserRole
 )
 from app.api.auth import get_current_user, require_role
 
