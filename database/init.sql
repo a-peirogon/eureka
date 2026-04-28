@@ -414,3 +414,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_update_question_stats
 AFTER INSERT ON attempt_answers
 FOR EACH ROW EXECUTE FUNCTION update_question_stats();
+
+-- Fix: difficulty como VARCHAR en lugar de enum para compatibilidad con SQLAlchemy
+ALTER TABLE questions ALTER COLUMN difficulty TYPE VARCHAR(1) USING difficulty::text;
+

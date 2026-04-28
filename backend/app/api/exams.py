@@ -95,6 +95,35 @@ def exam_to_dict(exam: MockExam, include_questions: bool = False) -> dict:
 
 # ── Exam Endpoints ─────────────────────────────────────────────────────────
 
+@router.get("/my/attempts")
+async def my_attempts(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(Attempt)
+        .options(selectinload(Attempt.exam))
+        .where(Attempt.student_id == current_user.id)
+        .order_by(Attempt.created_at.desc())
+        .limit(20)
+    )
+    attempts = result.scalars().all()
+    return [
+        {
+            "id": str(a.id),
+            "exam_id": str(a.exam_id),
+            "exam_title": a.exam.title if a.exam else None,
+            "status": a.status.value,
+            "score_global": float(a.score_global) if a.score_global else None,
+            "score_by_area": a.score_by_area,
+            "started_at": a.started_at.isoformat() if a.started_at else None,
+            "finished_at": a.finished_at.isoformat() if a.finished_at else None,
+            "time_spent_sec": a.time_spent_sec,
+        }
+        for a in attempts
+    ]
+
+
 @router.get("")
 async def list_exams(
     course_id: Optional[str] = None,
@@ -108,13 +137,17 @@ async def list_exams(
         .options(selectinload(MockExam.exam_questions))
         .order_by(MockExam.created_at.desc())
     )
+
+    # Bug fix: estudiante solo ve exámenes públicos O los de su curso
     if current_user.role == UserRole.estudiante:
-        query = query.where(
-            and_(MockExam.is_public == True) if not course_id else
-            MockExam.course_id == course_id
-        )
-    if course_id:
-        query = query.where(MockExam.course_id == course_id)
+        if course_id:
+            query = query.where(MockExam.course_id == course_id)
+        else:
+            query = query.where(MockExam.is_public == True)
+    else:
+        # Docente/admin puede filtrar por curso opcionalmente
+        if course_id:
+            query = query.where(MockExam.course_id == course_id)
 
     total = (await db.execute(select(func.count()).select_from(query.subquery()))).scalar()
     result = await db.execute(query.offset((page - 1) * limit).limit(limit))
@@ -256,6 +289,26 @@ async def delete_exam(
         raise HTTPException(404, "Simulacro no encontrado")
     await db.delete(exam)
     await db.commit()
+
+
+class ExamVisibilityUpdate(BaseModel):
+    is_public: bool
+
+
+@router.patch("/{exam_id}/visibility")
+async def update_exam_visibility(
+    exam_id: UUID,
+    req: ExamVisibilityUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(UserRole.docente, UserRole.admin)),
+):
+    result = await db.execute(select(MockExam).where(MockExam.id == exam_id))
+    exam = result.scalar_one_or_none()
+    if not exam:
+        raise HTTPException(404, "Simulacro no encontrado")
+    exam.is_public = req.is_public
+    await db.commit()
+    return {"id": str(exam.id), "is_public": exam.is_public}
 
 
 # ── Attempt Endpoints ──────────────────────────────────────────────────────
@@ -489,32 +542,3 @@ async def get_attempt_results(
         "time_spent_sec": att.time_spent_sec,
         "answers": answers_detail,
     }
-
-
-@router.get("/my/attempts")
-async def my_attempts(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    result = await db.execute(
-        select(Attempt)
-        .options(selectinload(Attempt.exam))
-        .where(Attempt.student_id == current_user.id)
-        .order_by(Attempt.created_at.desc())
-        .limit(20)
-    )
-    attempts = result.scalars().all()
-    return [
-        {
-            "id": str(a.id),
-            "exam_id": str(a.exam_id),
-            "exam_title": a.exam.title if a.exam else None,
-            "status": a.status.value,
-            "score_global": float(a.score_global) if a.score_global else None,
-            "score_by_area": a.score_by_area,
-            "started_at": a.started_at.isoformat() if a.started_at else None,
-            "finished_at": a.finished_at.isoformat() if a.finished_at else None,
-            "time_spent_sec": a.time_spent_sec,
-        }
-        for a in attempts
-    ]

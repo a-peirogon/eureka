@@ -101,6 +101,8 @@ export const examsApi = {
   create: (data: object) => api.post('/exams', data).then((r) => r.data),
   createAuto: (data: object) => api.post('/exams/auto', data).then((r) => r.data),
   delete: (id: string) => api.delete(`/exams/${id}`),
+  updateVisibility: (id: string, is_public: boolean) =>
+    api.patch(`/exams/${id}/visibility`, { is_public }).then((r) => r.data),
   startAttempt: (examId: string) =>
     api.post(`/exams/${examId}/attempts`).then((r) => r.data),
   saveAnswer: (examId: string, attemptId: string, data: object) =>

@@ -19,7 +19,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient()
   const [title, setTitle] = useState('')
   const [durationMin, setDurationMin] = useState(180)
-  const [isPublic, setIsPublic] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
   const [config, setConfig] = useState<Record<string, number>>({
     matematicas: 10, lectura_critica: 10,
     sociales_ciudadanas: 10, ciencias_naturales: 10, ingles: 5,
@@ -115,7 +115,7 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [durationMin, setDurationMin] = useState(180)
-  const [isPublic, setIsPublic] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [filterArea, setFilterArea] = useState('')
   const [search, setSearch] = useState('')
@@ -227,6 +227,16 @@ export default function TeacherExams() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['exams'] }); setDeleteId(null); toast.success('Simulacro eliminado') },
   })
 
+  const visibilityMut = useMutation({
+    mutationFn: ({ id, is_public }: { id: string; is_public: boolean }) =>
+      examsApi.updateVisibility(id, is_public),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['exams'] })
+      toast.success(vars.is_public ? 'Simulacro publicado ✓' : 'Simulacro ocultado')
+    },
+    onError: () => toast.error('Error al cambiar visibilidad'),
+  })
+
   const { data: viewData, isLoading: loadingView } = useQuery({
     queryKey: ['exam-detail', viewExam?.id],
     queryFn: () => examsApi.get(viewExam.id),
@@ -280,9 +290,19 @@ export default function TeacherExams() {
                     ? <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center"><Wand2 size={15} className="text-purple-600" /></div>
                     : <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center"><FileText size={15} className="text-blue-600" /></div>
                   }
-                  <span className={clsx('badge text-xs', exam.is_public ? 'badge-green' : 'badge-gray')}>
-                    {exam.is_public ? 'Público' : 'Privado'}
-                  </span>
+                  <button
+                    onClick={() => visibilityMut.mutate({ id: exam.id, is_public: !exam.is_public })}
+                    disabled={visibilityMut.isPending}
+                    title={exam.is_public ? 'Clic para ocultar' : 'Clic para publicar para estudiantes'}
+                    className={clsx(
+                      'badge text-xs cursor-pointer border transition-colors',
+                      exam.is_public
+                        ? 'badge-green border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                        : 'badge-gray border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
+                    )}
+                  >
+                    {exam.is_public ? '● Público' : '○ Privado — publicar'}
+                  </button>
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => setViewExam(exam)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-primary-600">
