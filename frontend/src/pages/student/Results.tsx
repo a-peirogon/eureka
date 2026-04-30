@@ -52,7 +52,7 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
           <div className="space-y-2 mt-4">
             {ans.opciones?.map((opt: any) => (
               <div key={opt.letra} className={clsx(
-                'flex items-start gap-3 p-3 rounded-xl text-sm',
+                'flex items-start gap-3 p-3 rounded-2xl text-sm',
                 opt.letra === ans.respuesta_correcta
                   ? 'bg-emerald-50 border border-emerald-200'
                   : opt.letra === ans.respuesta_dada && !ans.is_correct
@@ -78,8 +78,8 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
           </div>
 
           {ans.explicacion && (
-            <div className="mt-4 p-4 bg-primary-50 rounded-xl border border-primary-100">
-              <p className="text-xs font-semibold text-primary-700 mb-1">💡 Explicación</p>
+            <div className="mt-4 p-4 bg-blue-600 rounded-2xl border border-blue-400">
+              <p className="text-xs font-semibold text-blue-600 mb-1">💡 Explicación</p>
               <p className="text-sm text-slate-700">{ans.explicacion}</p>
             </div>
           )}
@@ -138,24 +138,24 @@ export default function StudentResults() {
           </div>
 
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-emerald-50 rounded-xl">
+            <div className="text-center p-4 bg-emerald-50 rounded-2xl">
               <p className="text-2xl font-bold text-emerald-700">
                 {result.answers?.filter((a: any) => a.is_correct).length}
               </p>
               <p className="text-xs text-slate-500">Correctas</p>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-xl">
+            <div className="text-center p-4 bg-red-50 rounded-2xl">
               <p className="text-2xl font-bold text-red-600">
                 {result.answers?.filter((a: any) => !a.is_correct).length}
               </p>
               <p className="text-xs text-slate-500">Incorrectas</p>
             </div>
-            <div className="text-center p-4 bg-slate-50 rounded-xl">
-              <p className="text-2xl font-bold text-navy-900">{result.answers?.length}</p>
+            <div className="text-center p-4 bg-slate-50 rounded-2xl">
+              <p className="text-2xl font-bold text-slate-900">{result.answers?.length}</p>
               <p className="text-xs text-slate-500">Total</p>
             </div>
             {result.time_spent_sec && (
-              <div className="text-center p-4 bg-blue-50 rounded-xl">
+              <div className="text-center p-4 bg-blue-50 rounded-2xl">
                 <p className="text-2xl font-bold text-blue-700">{fmt(result.time_spent_sec)}</p>
                 <p className="text-xs text-slate-500">Tiempo</p>
               </div>
@@ -179,7 +179,7 @@ export default function StudentResults() {
 
       {/* Score by area */}
       <div className="card mb-6">
-        <h3 className="font-semibold text-navy-900 mb-4">Puntaje por área</h3>
+        <h3 className="font-semibold text-slate-900 mb-4">Puntaje por área</h3>
         <div className="space-y-3">
           {Object.entries(result.score_by_area ?? {}).map(([area, pct]) => (
             <div key={area}>
@@ -203,7 +203,7 @@ export default function StudentResults() {
       {/* Answers list */}
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h3 className="font-semibold text-navy-900">Revisión de preguntas ({answers.length})</h3>
+          <h3 className="font-semibold text-slate-900">Revisión de preguntas ({answers.length})</h3>
           <div className="flex gap-2 flex-wrap">
             {(['all', 'correct', 'wrong'] as const).map((f) => (
               <button

@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, BookOpen, FileText, BarChart3, Users,
-  Upload, LogOut, Menu, X, ChevronRight, Bell, Zap,
-  GraduationCap, Settings, CircleCheck
+  Upload, LogOut, Menu, X, ChevronRight, GraduationCap,
+  ChevronLeft
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/lib/api'
@@ -13,17 +13,20 @@ import clsx from 'clsx'
 export function Spinner({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg'; className?: string }) {
   const s = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-10 h-10' }[size]
   return (
-    <div className={clsx('animate-spin rounded-full border-2 border-primary-200 border-t-primary-600', s, className)} />
+    <div className={clsx('animate-spin rounded-full border-2 border-blue-200 border-t-blue-600', s, className)} />
   )
 }
 
 // ── Loading Page ────────────────────────────────────────────────────────────
 export function LoadingPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-100">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
-        <Spinner size="lg" className="mx-auto mb-3" />
-        <p className="text-sm text-stone-400 font-body">Cargando...</p>
+        <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-blue-600 flex items-center justify-center shadow-glow">
+          <GraduationCap size={24} className="text-white" />
+        </div>
+        <Spinner size="md" className="mx-auto mb-3" />
+        <p className="text-sm text-slate-400">Cargando...</p>
       </div>
     </div>
   )
@@ -38,8 +41,12 @@ export function EmptyState({ icon, title, subtitle, action }: {
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-      {icon && <div className="text-slate-300 mb-4">{icon}</div>}
-      <h3 className="text-lg font-semibold text-slate-600 mb-1">{title}</h3>
+      {icon && (
+        <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+          {icon}
+        </div>
+      )}
+      <h3 className="text-base font-semibold text-slate-700 mb-1">{title}</h3>
       {subtitle && <p className="text-sm text-slate-400 mb-6 max-w-xs">{subtitle}</p>}
       {action}
     </div>
@@ -48,11 +55,11 @@ export function EmptyState({ icon, title, subtitle, action }: {
 
 // ── Area Badge ─────────────────────────────────────────────────────────────
 const AREA_MAP: Record<string, { label: string; cls: string }> = {
-  matematicas:          { label: 'Matemáticas',        cls: 'area-mat' },
-  lectura_critica:      { label: 'Lectura Crítica',    cls: 'area-lc' },
-  sociales_ciudadanas:  { label: 'Sociales',           cls: 'area-soc' },
-  ciencias_naturales:   { label: 'Ciencias',           cls: 'area-cn' },
-  ingles:               { label: 'Inglés',             cls: 'area-ing' },
+  matematicas:          { label: 'Matemáticas',     cls: 'area-mat' },
+  lectura_critica:      { label: 'Lectura Crítica', cls: 'area-lc'  },
+  sociales_ciudadanas:  { label: 'Sociales',        cls: 'area-soc' },
+  ciencias_naturales:   { label: 'Ciencias',        cls: 'area-cn'  },
+  ingles:               { label: 'Inglés',          cls: 'area-ing' },
 }
 
 export function AreaBadge({ area }: { area: string }) {
@@ -85,21 +92,21 @@ export function ScoreRing({ score, size = 80 }: { score: number; size?: number }
   const r = (size - 12) / 2
   const circ = 2 * Math.PI * r
   const offset = circ - (score / 100) * circ
-  const color = score >= 70 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
+  const color = score >= 70 ? '#059669' : score >= 50 ? '#d97706' : '#dc2626'
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#e5e7eb" strokeWidth={8} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#f1f5f9" strokeWidth={8} />
       <circle
         cx={size/2} cy={size/2} r={r} fill="none"
         stroke={color} strokeWidth={8}
         strokeDasharray={circ} strokeDashoffset={offset}
         strokeLinecap="round"
         transform={`rotate(-90 ${size/2} ${size/2})`}
-        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+        style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(.4,0,.2,1)' }}
       />
       <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle"
-        fontSize={size * 0.22} fontWeight="700" fill="#1a1d2e">
+        fontSize={size * 0.21} fontWeight="700" fill="#0f172a">
         {score.toFixed(0)}%
       </text>
     </svg>
@@ -107,7 +114,7 @@ export function ScoreRing({ score, size = 80 }: { score: number; size?: number }
 }
 
 // ── Progress Bar ───────────────────────────────────────────────────────────
-export function ProgressBar({ value, max = 100, color = 'bg-primary-500', className = '' }: {
+export function ProgressBar({ value, max = 100, color = 'bg-blue-500', className = '' }: {
   value: number; max?: number; color?: string; className?: string
 }) {
   const pct = Math.min(100, (value / max) * 100)
@@ -126,14 +133,28 @@ export function Modal({ open, onClose, title, children, size = 'md' }: {
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className={clsx('relative bg-stone-50 rounded-sm shadow-2xl w-full animate-slide-up border border-stone-300', widths[size])}>
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-stone-300 bg-stone-100">
-          <h3 className="text-base font-display text-navy-900 tracking-tight">{title}</h3>
-          <button onClick={onClose} className="btn-ghost p-1">
-            <X size={18} />
+      {/* Overlay */}
+      <div
+        className="modal-overlay absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      {/* Panel */}
+      <div className={clsx(
+        'modal-panel relative bg-white rounded-3xl shadow-modal w-full overflow-hidden',
+        widths[size]
+      )}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h3 className="text-base font-display text-slate-900">{title}</h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-2xl flex items-center justify-center text-slate-400
+                       hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
+            <X size={16} />
           </button>
         </div>
+        {/* Body */}
         <div className="px-6 py-5">{children}</div>
       </div>
     </div>
@@ -147,7 +168,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, loadin
 }) {
   return (
     <Modal open={open} onClose={onClose} title={title} size="sm">
-      <p className="text-slate-600 text-sm mb-6">{message}</p>
+      <p className="text-slate-600 text-sm mb-6 leading-relaxed">{message}</p>
       <div className="flex gap-3 justify-end">
         <button className="btn-secondary" onClick={onClose} disabled={loading}>Cancelar</button>
         <button className="btn-danger" onClick={onConfirm} disabled={loading}>
@@ -167,17 +188,23 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: '/student/dashboard', icon: <LayoutDashboard size={18} />, label: 'Panel', roles: ['estudiante'] },
-  { to: '/student/exams',     icon: <FileText size={18} />,        label: 'Simulacros', roles: ['estudiante'] },
-  { to: '/student/results',   icon: <BarChart3 size={18} />,       label: 'Resultados', roles: ['estudiante'] },
-  { to: '/teacher/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard', roles: ['docente', 'admin'] },
-  { to: '/teacher/questions', icon: <BookOpen size={18} />,        label: 'Preguntas', roles: ['docente', 'admin'] },
-  { to: '/teacher/exams',     icon: <FileText size={18} />,        label: 'Simulacros', roles: ['docente', 'admin'] },
-  { to: '/teacher/courses',   icon: <GraduationCap size={18} />,   label: 'Cursos', roles: ['docente', 'admin'] },
+  { to: '/student/dashboard', icon: <LayoutDashboard size={18} />, label: 'Panel',        roles: ['estudiante'] },
+  { to: '/student/exams',     icon: <FileText size={18} />,        label: 'Simulacros',   roles: ['estudiante'] },
+  { to: '/student/results',   icon: <BarChart3 size={18} />,       label: 'Resultados',   roles: ['estudiante'] },
+  { to: '/teacher/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard',    roles: ['docente', 'admin'] },
+  { to: '/teacher/questions', icon: <BookOpen size={18} />,        label: 'Preguntas',    roles: ['docente', 'admin'] },
+  { to: '/teacher/exams',     icon: <FileText size={18} />,        label: 'Simulacros',   roles: ['docente', 'admin'] },
+  { to: '/teacher/courses',   icon: <GraduationCap size={18} />,   label: 'Cursos',       roles: ['docente', 'admin'] },
   { to: '/teacher/import',    icon: <Upload size={18} />,          label: 'Importar / OCR', roles: ['docente', 'admin'] },
-  { to: '/teacher/analytics', icon: <BarChart3 size={18} />,       label: 'Analítica', roles: ['docente', 'admin'] },
-  { to: '/admin/users',       icon: <Users size={18} />,           label: 'Usuarios', roles: ['admin'] },
+  { to: '/teacher/analytics', icon: <BarChart3 size={18} />,       label: 'Analítica',    roles: ['docente', 'admin'] },
+  { to: '/admin/users',       icon: <Users size={18} />,           label: 'Usuarios',     roles: ['admin'] },
 ]
+
+const ROLE_LABEL: Record<string, string> = {
+  estudiante: 'Estudiante',
+  docente:    'Docente',
+  admin:      'Administrador',
+}
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const location = useLocation()
@@ -187,40 +214,55 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
   const visibleNav = NAV.filter((n) => user && n.roles.includes(user.role))
 
   const handleLogout = async () => {
-    try {
-      if (refresh_token) await authApi.logout(refresh_token)
-    } catch {}
+    try { if (refresh_token) await authApi.logout(refresh_token) } catch {}
     clearAuth()
     navigate('/login')
   }
 
   return (
     <aside className={clsx(
-      'fixed left-0 top-0 h-full bg-navy-900 text-white flex flex-col z-30',
-      'transition-all duration-300 border-r border-navy-800',
-      collapsed ? 'w-16' : 'w-60'
+      'fixed left-0 top-0 h-full flex flex-col z-30 transition-all duration-300',
+      'bg-slate-900 text-white',
+      collapsed ? 'w-[68px]' : 'w-[240px]'
     )}>
-      {/* Línea dorada decorativa */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gold-600" />
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
 
       {/* Logo */}
-      <div className="h-16 flex items-center gap-3 px-4 border-b border-white/10 flex-shrink-0">
-        <div className="w-8 h-8 border-2 border-gold-500 flex items-center justify-center flex-shrink-0">
-          <GraduationCap size={16} className="text-gold-400" />
+      <div className={clsx(
+        'h-16 flex items-center border-b border-white/[.06] flex-shrink-0',
+        collapsed ? 'px-4 justify-center' : 'px-4 gap-3'
+      )}>
+        <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-glow">
+          <GraduationCap size={16} className="text-white" />
         </div>
         {!collapsed && (
-          <span className="font-display text-base text-white tracking-wide">Eureka</span>
+          <span className="font-display text-[15px] text-white flex-1 tracking-tight">Eureka</span>
         )}
-        <button onClick={onToggle} className="ml-auto text-white/40 hover:text-white transition-colors">
-          {collapsed ? <ChevronRight size={15} /> : <Menu size={15} />}
+        <button
+          onClick={onToggle}
+          className={clsx(
+            'w-6 h-6 rounded-lg flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/10 transition-all',
+            collapsed && 'hidden'
+          )}
+        >
+          <ChevronLeft size={14} />
         </button>
+        {collapsed && (
+          <button
+            onClick={onToggle}
+            className="absolute -right-3 top-[22px] w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-white/60 hover:text-white transition-all shadow-sm"
+          >
+            <ChevronRight size={12} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-5 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
         {!collapsed && (
-          <p className="px-3 py-1 text-xs font-bold text-white/25 uppercase tracking-widest mb-3">
-            {user?.role === 'estudiante' ? 'Estudiante' : user?.role === 'docente' ? 'Docente' : 'Admin'}
+          <p className="px-3 py-1 text-[10px] font-bold text-white/25 uppercase tracking-[0.12em] mb-2">
+            {ROLE_LABEL[user?.role ?? ''] ?? 'Menú'}
           </p>
         )}
         {visibleNav.map((item) => {
@@ -231,31 +273,40 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
               to={item.to}
               title={collapsed ? item.label : undefined}
               className={clsx(
-                'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all rounded-sm',
+                'flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all duration-150',
                 active
-                  ? 'bg-white/15 text-white border-l-2 border-gold-500 pl-2.5'
-                  : 'text-white/55 hover:bg-white/8 hover:text-white/90 border-l-2 border-transparent pl-2.5'
+                  ? 'bg-white/[.12] text-white'
+                  : 'text-white/50 hover:bg-white/[.07] hover:text-white/85',
+                collapsed && 'justify-center'
               )}
             >
-              <span className="flex-shrink-0 opacity-80">{item.icon}</span>
-              {!collapsed && <span className="tracking-wide">{item.label}</span>}
+              <span className={clsx('flex-shrink-0', active ? 'text-blue-400' : 'opacity-70')}>
+                {item.icon}
+              </span>
+              {!collapsed && <span>{item.label}</span>}
+              {active && !collapsed && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />
+              )}
             </Link>
           )
         })}
       </nav>
 
       {/* User & logout */}
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t border-white/[.06] p-3">
         {!collapsed ? (
-          <div className="flex items-center gap-3 p-2 hover:bg-white/8 cursor-pointer group rounded-sm">
-            <div className="w-8 h-8 border border-gold-600 bg-navy-700 flex items-center justify-center text-xs font-bold flex-shrink-0 text-gold-400">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-2xl hover:bg-white/[.07] cursor-pointer transition-all group">
+            <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
               {user?.full_name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-              <p className="text-xs text-white/35 truncate">{user?.email}</p>
+              <p className="text-xs font-semibold text-white truncate">{user?.full_name}</p>
+              <p className="text-[11px] text-white/35 truncate">{user?.email}</p>
             </div>
-            <button onClick={handleLogout} className="text-white/25 hover:text-red-400 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="text-white/20 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-white/10"
+            >
               <LogOut size={14} />
             </button>
           </div>
@@ -263,9 +314,9 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
           <button
             onClick={handleLogout}
             title="Cerrar sesión"
-            className="w-full flex justify-center text-white/35 hover:text-red-400 p-2 transition-colors"
+            className="w-full flex justify-center items-center text-white/30 hover:text-red-400 p-2.5 rounded-2xl hover:bg-white/10 transition-all"
           >
-            <LogOut size={17} />
+            <LogOut size={16} />
           </button>
         )}
       </div>
@@ -289,7 +340,7 @@ export function TopHeader({ title, subtitle, actions }: {
 }
 
 // ── Stat Card ──────────────────────────────────────────────────────────────
-export function StatCard({ icon, label, value, sub, iconBg = 'bg-primary-100', iconColor = 'text-primary-600' }: {
+export function StatCard({ icon, label, value, sub, iconBg = 'bg-blue-100', iconColor = 'text-blue-600' }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string
   iconBg?: string; iconColor?: string
 }) {
@@ -310,25 +361,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="min-h-screen bg-stone-100">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <main
-        className={clsx(
-          'transition-all duration-300 min-h-screen',
-          collapsed ? 'ml-16' : 'ml-60'
-        )}
-      >
+      <main className={clsx('transition-all duration-300 min-h-screen', collapsed ? 'ml-[68px]' : 'ml-[240px]')}>
         <div className="p-6 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
   )
 }
 
-// ── Question Card ──────────────────────────────────────────────────────────
+// ── Question Status Badge ──────────────────────────────────────────────────
 export function QuestionStatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    borrador: 'badge-yellow',
-    aprobado: 'badge-green',
+    borrador:  'badge-yellow',
+    aprobado:  'badge-green',
     archivado: 'badge-gray',
   }
   const labels: Record<string, string> = {
@@ -347,7 +393,7 @@ export function TimerDisplay({ seconds, warn = false }: { seconds: number; warn?
   return (
     <span className={clsx(
       'font-mono font-bold text-lg tabular-nums',
-      warn ? 'text-red-500 animate-pulse-soft' : 'text-navy-900'
+      warn ? 'text-red-500 animate-[pulseSoft_2s_ease-in-out_infinite]' : 'text-slate-800'
     )}>
       {h > 0 ? `${fmt(h)}:` : ''}{fmt(m)}:{fmt(s)}
     </span>
@@ -365,7 +411,7 @@ export function Alert({ type = 'info', title, message }: {
     error:   'bg-red-50 border-red-200 text-red-800',
   }
   return (
-    <div className={clsx('border rounded-xl p-4 text-sm', styles[type])}>
+    <div className={clsx('border rounded-2xl p-4 text-sm', styles[type])}>
       {title && <p className="font-semibold mb-0.5">{title}</p>}
       <p>{message}</p>
     </div>

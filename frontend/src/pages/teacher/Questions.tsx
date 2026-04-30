@@ -152,7 +152,7 @@ function AIGenerateForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-primary-50 rounded-xl border border-primary-100 text-sm text-primary-700">
+      <div className="p-4 bg-blue-600 rounded-2xl border border-blue-400 text-sm text-blue-600">
         La IA generará una pregunta original basada en los parámetros que definas. Se guardará como <strong>borrador</strong> para que la revises antes de aprobarla.
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -176,7 +176,7 @@ function AIGenerateForm({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex gap-3 justify-end">
         <button onClick={onClose} className="btn-secondary">Cancelar</button>
-        <button onClick={handleGenerate} disabled={loading} className="btn bg-primary-600 text-white hover:bg-primary-700 gap-2">
+        <button onClick={handleGenerate} disabled={loading} className="btn bg-blue-600 text-white hover:bg-blue-600 gap-2">
           {loading ? <><Spinner size="sm" /> Generando...</> : <><Wand2 size={15} /> Generar con IA</>}
         </button>
       </div>
@@ -425,7 +425,7 @@ export default function TeacherQuestions() {
             <div className="space-y-2">
               {viewQ.opciones?.map((opt) => (
                 <div key={opt.letra} className={clsx(
-                  'flex items-start gap-3 p-3 rounded-xl border',
+                  'flex items-start gap-3 p-3 rounded-2xl border',
                   opt.letra === viewQ.respuesta_correcta ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100'
                 )}>
                   <span className={clsx(
@@ -437,8 +437,8 @@ export default function TeacherQuestions() {
               ))}
             </div>
             {viewQ.explicacion && (
-              <div className="p-4 bg-primary-50 rounded-xl border border-primary-100 text-sm text-slate-700">
-                <p className="font-semibold text-primary-700 mb-1">💡 Explicación</p>
+              <div className="p-4 bg-blue-600 rounded-2xl border border-blue-400 text-sm text-slate-700">
+                <p className="font-semibold text-blue-600 mb-1">💡 Explicación</p>
                 {viewQ.explicacion}
               </div>
             )}

@@ -48,7 +48,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="p-3 bg-purple-50 border border-purple-100 rounded-xl text-xs text-purple-700">
+      <div className="p-3 bg-purple-50 border border-purple-100 rounded-2xl text-xs text-purple-700">
         El sistema seleccionará preguntas aprobadas aleatoriamente según la distribución que definas.
       </div>
 
@@ -71,7 +71,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
             className="flex items-center gap-2 text-sm text-slate-600"
           >
             {isPublic
-              ? <ToggleRight size={22} className="text-primary-600" />
+              ? <ToggleRight size={22} className="text-blue-600" />
               : <ToggleLeft size={22} className="text-slate-400" />
             }
             {isPublic ? 'Público' : 'Solo con enlace'}
@@ -91,9 +91,9 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
               <input
                 type="range" min={0} max={25} value={config[a] ?? 0}
                 onChange={(e) => setConfig({ ...config, [a]: Number(e.target.value) })}
-                className="flex-1 accent-primary-600"
+                className="flex-1 accent-blue-600"
               />
-              <span className="w-8 text-center text-sm font-semibold text-navy-900">{config[a] ?? 0}</span>
+              <span className="w-8 text-center text-sm font-semibold text-slate-900">{config[a] ?? 0}</span>
             </div>
           ))}
         </div>
@@ -159,7 +159,7 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex items-end pb-1">
           <button type="button" onClick={() => setIsPublic(!isPublic)} className="flex items-center gap-2 text-sm text-slate-600">
-            {isPublic ? <ToggleRight size={22} className="text-primary-600" /> : <ToggleLeft size={22} className="text-slate-400" />}
+            {isPublic ? <ToggleRight size={22} className="text-blue-600" /> : <ToggleLeft size={22} className="text-slate-400" />}
             {isPublic ? 'Público' : 'Privado'}
           </button>
         </div>
@@ -177,11 +177,11 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
             {AREAS.map((a) => <option key={a} value={a}>{AREA_LABELS[a].split(' ')[0]}</option>)}
           </select>
         </div>
-        <div className="max-h-52 overflow-y-auto space-y-1.5 border border-slate-100 rounded-xl p-2">
+        <div className="max-h-52 overflow-y-auto space-y-1.5 border border-slate-100 rounded-2xl p-2">
           {(qData?.items ?? []).map((q: any) => (
             <label key={q.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-slate-50 cursor-pointer">
               <input type="checkbox" checked={selectedIds.includes(q.id)}
-                onChange={() => toggle(q.id)} className="mt-0.5 accent-primary-600" />
+                onChange={() => toggle(q.id)} className="mt-0.5 accent-blue-600" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-700 line-clamp-1">{q.enunciado}</p>
                 <div className="flex gap-1.5 mt-0.5">
@@ -287,8 +287,8 @@ export default function TeacherExams() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {exam.auto_generated
-                    ? <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center"><Wand2 size={15} className="text-purple-600" /></div>
-                    : <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center"><FileText size={15} className="text-blue-600" /></div>
+                    ? <div className="w-8 h-8 bg-purple-100 rounded-2xl flex items-center justify-center"><Wand2 size={15} className="text-purple-600" /></div>
+                    : <div className="w-8 h-8 bg-blue-100 rounded-2xl flex items-center justify-center"><FileText size={15} className="text-blue-600" /></div>
                   }
                   <button
                     onClick={() => visibilityMut.mutate({ id: exam.id, is_public: !exam.is_public })}
@@ -305,7 +305,7 @@ export default function TeacherExams() {
                   </button>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => setViewExam(exam)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-primary-600">
+                  <button onClick={() => setViewExam(exam)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-blue-600">
                     <Eye size={14} />
                   </button>
                   <button onClick={() => setDeleteId(exam.id)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-red-500">
@@ -314,7 +314,7 @@ export default function TeacherExams() {
                 </div>
               </div>
 
-              <h3 className="font-semibold text-navy-900 mb-1 line-clamp-2">{exam.title}</h3>
+              <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">{exam.title}</h3>
               {exam.description && <p className="text-xs text-slate-400 mb-3 line-clamp-2">{exam.description}</p>}
 
               <div className="flex items-center gap-4 text-xs text-slate-500 border-t border-slate-100 pt-3 mt-auto">
@@ -361,7 +361,7 @@ export default function TeacherExams() {
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {(viewData.questions ?? []).map((q: any, i: number) => (
-                <div key={q.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50">
+                <div key={q.id} className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50">
                   <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
                   <div>
                     <p className="text-sm text-slate-700 line-clamp-2">{q.enunciado}</p>

@@ -52,7 +52,7 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
     )}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-100">
-        <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold">
+        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
           {index + 1}
         </div>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {(['A','B','C','D'] as const).map((l) => (
                 <div key={l} className={clsx(
-                  'flex items-start gap-2 p-2.5 rounded-xl text-xs',
+                  'flex items-start gap-2 p-2.5 rounded-2xl text-xs',
                   l === local.respuesta_correcta
                     ? 'bg-emerald-50 border border-emerald-200'
                     : 'bg-slate-50 border border-slate-100'
@@ -265,7 +265,7 @@ export default function TeacherImport() {
                 <div className={clsx(
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
                   (step === 'upload' && s.n === 1) || (step === 'review' && s.n <= 3) || (step === 'done')
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-400'
                 )}>
                   {s.n}
@@ -282,7 +282,7 @@ export default function TeacherImport() {
         {/* Upload panel */}
         <div className="lg:col-span-2 space-y-4">
           <div className="card">
-            <h3 className="font-semibold text-navy-900 mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <Upload size={16} /> Subir archivo
             </h3>
 
@@ -292,7 +292,7 @@ export default function TeacherImport() {
               onClick={() => fileRef.current?.click()}
               className={clsx(
                 'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
-                file ? 'border-primary-400 bg-primary-50' : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                file ? 'border-blue-400 bg-blue-600' : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50'
               )}
             >
               <input
@@ -303,8 +303,8 @@ export default function TeacherImport() {
               />
               {file ? (
                 <div>
-                  <FileImage size={32} className="mx-auto text-primary-500 mb-2" />
-                  <p className="text-sm font-medium text-navy-900">{file.name}</p>
+                  <FileImage size={32} className="mx-auto text-blue-500 mb-2" />
+                  <p className="text-sm font-medium text-slate-900">{file.name}</p>
                   <p className="text-xs text-slate-400 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
                 </div>
               ) : (
@@ -318,7 +318,7 @@ export default function TeacherImport() {
 
             {/* Preview */}
             {preview && (
-              <div className="mt-3 rounded-xl overflow-hidden border border-slate-200">
+              <div className="mt-3 rounded-2xl overflow-hidden border border-slate-200">
                 <img src={preview} alt="Vista previa" className="w-full max-h-48 object-contain bg-slate-50" />
               </div>
             )}
@@ -356,7 +356,7 @@ export default function TeacherImport() {
                 'Las preguntas quedan como borradores',
               ].map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-slate-500">
-                  <span className="w-4 h-4 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                  <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   {s}
@@ -371,7 +371,7 @@ export default function TeacherImport() {
               <h4 className="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
                 <FileText size={14} /> Texto OCR detectado
               </h4>
-              <p className="text-xs text-slate-500 font-mono bg-slate-50 p-3 rounded-xl max-h-32 overflow-y-auto whitespace-pre-wrap">
+              <p className="text-xs text-slate-500 font-mono bg-slate-50 p-3 rounded-2xl max-h-32 overflow-y-auto whitespace-pre-wrap">
                 {ocrText}
               </p>
             </div>
@@ -394,7 +394,7 @@ export default function TeacherImport() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-navy-900">
+                  <h3 className="font-semibold text-slate-900">
                     {questions.length} pregunta(s) detectada(s)
                   </h3>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -439,7 +439,7 @@ export default function TeacherImport() {
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={32} className="text-emerald-600" />
               </div>
-              <h3 className="font-display text-xl text-navy-900 mb-2">¡Importación completada!</h3>
+              <h3 className="font-display text-xl text-slate-900 mb-2">¡Importación completada!</h3>
               <p className="text-slate-500 text-sm mb-6">
                 {savedCount} pregunta(s) guardadas como borradores en el banco de preguntas.
               </p>

@@ -115,16 +115,16 @@ function EnrollModal({ course, onClose }: { course: Course; onClose: () => void 
           value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      <div className="max-h-56 overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50">
+      <div className="max-h-56 overflow-y-auto border border-slate-100 rounded-2xl divide-y divide-slate-50">
         {(usersData?.items ?? []).map((u: any) => (
           <label key={u.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer">
             <input type="checkbox" checked={selected.includes(u.id)} onChange={() => toggle(u.id)}
-              className="accent-primary-600" />
-            <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+              className="accent-blue-600" />
+            <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
               {u.full_name?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-medium text-navy-900">{u.full_name}</p>
+              <p className="text-sm font-medium text-slate-900">{u.full_name}</p>
               <p className="text-xs text-slate-400">{u.email}</p>
             </div>
           </label>
@@ -135,7 +135,7 @@ function EnrollModal({ course, onClose }: { course: Course; onClose: () => void 
       </div>
 
       {selected.length > 0 && (
-        <p className="text-xs text-primary-600 font-medium">{selected.length} seleccionado(s)</p>
+        <p className="text-xs text-blue-600 font-medium">{selected.length} seleccionado(s)</p>
       )}
 
       <div className="flex gap-3 justify-end">
@@ -203,7 +203,7 @@ export default function TeacherCourses() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-navy-900">{c.name}</h3>
+                <h3 className="font-semibold text-slate-900">{c.name}</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {c.grade ? `Grado ${c.grade}°` : ''} {c.school_year ? `· ${c.school_year}` : ''}
                 </p>

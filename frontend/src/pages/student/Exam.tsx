@@ -163,9 +163,9 @@ export default function StudentExam() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Bar */}
-      <header className="bg-navy-900 text-white px-6 py-3 flex items-center gap-4 sticky top-0 z-20">
+      <header className="bg-slate-900 text-white px-6 py-3 flex items-center gap-4 sticky top-0 z-20">
         <div className="flex items-center gap-2">
-          <BookMarked size={18} className="text-gold-400" />
+          <BookMarked size={18} className="text-amber-600" />
           <span className="font-semibold text-sm truncate max-w-[200px]">{exam?.title}</span>
         </div>
 
@@ -176,7 +176,7 @@ export default function StudentExam() {
           <span>{totalAnswered}/{questions.length}</span>
           <div className="w-24 h-1.5 bg-white/20 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gold-400 rounded-full transition-all"
+              className="h-full bg-amber-100 rounded-full transition-all"
               style={{ width: `${(totalAnswered / questions.length) * 100}%` }}
             />
           </div>
@@ -184,7 +184,7 @@ export default function StudentExam() {
 
         {/* Timer */}
         <div className={clsx(
-          'flex items-center gap-2 px-3 py-1.5 rounded-xl',
+          'flex items-center gap-2 px-3 py-1.5 rounded-2xl',
           warn ? 'bg-red-900/50' : 'bg-white/10'
         )}>
           {warn && <AlertTriangle size={14} className="text-red-400" />}
@@ -194,7 +194,7 @@ export default function StudentExam() {
         {/* Nav toggle */}
         <button
           onClick={() => setShowNav(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-sm transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-2xl text-sm transition-colors"
         >
           <Grid3x3 size={15} />
           <span className="hidden sm:inline">Mapa</span>
@@ -246,7 +246,7 @@ export default function StudentExam() {
                 <div className={clsx(
                   'w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 font-bold text-sm',
                   currentAnswer === opt.letra
-                    ? 'border-primary-500 bg-primary-500 text-white'
+                    ? 'border-blue-400 bg-blue-600 text-white'
                     : 'border-slate-300 text-slate-500'
                 )}>
                   {opt.letra}
@@ -296,11 +296,11 @@ export default function StudentExam() {
       {/* Question Navigator Modal */}
       <Modal open={showNav} onClose={() => setShowNav(false)} title="Mapa de preguntas" size="lg">
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center p-3 bg-slate-50 rounded-xl">
-            <p className="text-2xl font-bold text-navy-900">{totalAnswered}</p>
+          <div className="text-center p-3 bg-slate-50 rounded-2xl">
+            <p className="text-2xl font-bold text-slate-900">{totalAnswered}</p>
             <p className="text-xs text-slate-500">Respondidas</p>
           </div>
-          <div className="text-center p-3 bg-slate-50 rounded-xl">
+          <div className="text-center p-3 bg-slate-50 rounded-2xl">
             <p className="text-2xl font-bold text-amber-600">{flagged.length}</p>
             <p className="text-xs text-slate-500">Marcadas</p>
           </div>
@@ -318,7 +318,7 @@ export default function StudentExam() {
                 className={clsx(
                   'h-9 rounded-lg text-xs font-semibold border-2 transition-all',
                   idx === store.currentIndex
-                    ? 'border-primary-500 bg-primary-500 text-white'
+                    ? 'border-blue-400 bg-blue-600 text-white'
                     : hasAnswer && marked
                     ? 'border-amber-400 bg-amber-100 text-amber-700'
                     : hasAnswer
@@ -353,10 +353,10 @@ export default function StudentExam() {
       {/* Submit Confirm */}
       <Modal open={showConfirm} onClose={() => setShowConfirm(false)} title="Entregar simulacro" size="sm">
         <div className="space-y-3 mb-6">
-          <div className="p-4 bg-slate-50 rounded-xl">
+          <div className="p-4 bg-slate-50 rounded-2xl">
             <div className="grid grid-cols-2 gap-3 text-center">
               <div>
-                <p className="text-2xl font-bold text-navy-900">{totalAnswered}</p>
+                <p className="text-2xl font-bold text-slate-900">{totalAnswered}</p>
                 <p className="text-xs text-slate-500">Respondidas</p>
               </div>
               <div>
@@ -369,7 +369,7 @@ export default function StudentExam() {
           </div>
 
           {questions.length - totalAnswered > 0 && (
-            <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-3 rounded-xl text-sm">
+            <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-3 rounded-2xl text-sm">
               <AlertTriangle size={15} />
               Tienes {questions.length - totalAnswered} preguntas sin responder.
             </div>

@@ -77,7 +77,7 @@ export default function AdminUsers() {
         <StatCard icon={<Users size={20} />} label="Total usuarios" value={statsData?.total ?? 0}
           iconBg="bg-blue-100" iconColor="text-blue-600" />
         <StatCard icon={<GraduationCap size={20} />} label="Estudiantes"
-          value={statsData?.by_role?.estudiante ?? 0} iconBg="bg-primary-100" iconColor="text-primary-600" />
+          value={statsData?.by_role?.estudiante ?? 0} iconBg="bg-blue-100" iconColor="text-blue-600" />
         <StatCard icon={<BookOpen size={20} />} label="Docentes"
           value={statsData?.by_role?.docente ?? 0} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
         <StatCard icon={<Shield size={20} />} label="Admins"
@@ -144,11 +144,11 @@ export default function AdminUsers() {
                   <tr key={u.id}>
                     <td>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                           {u.full_name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-medium text-navy-900 text-sm">{u.full_name}</p>
+                          <p className="font-medium text-slate-900 text-sm">{u.full_name}</p>
                           <p className="text-xs text-slate-400">{u.email}</p>
                         </div>
                       </div>

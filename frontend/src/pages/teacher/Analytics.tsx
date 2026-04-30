@@ -18,7 +18,7 @@ import { AREA_LABELS, AREA_COLORS, type QuestionArea } from '@/types'
 
 const DEMO_COURSE_ID = '00000000-0000-0000-0000-000000000020'
 
-const RANK_COLORS = ['text-gold-500', 'text-slate-500', 'text-amber-700']
+const RANK_COLORS = ['text-amber-500', 'text-slate-500', 'text-amber-700']
 const RANK_ICONS = ['🥇', '🥈', '🥉']
 
 export default function TeacherAnalytics() {
@@ -70,7 +70,7 @@ export default function TeacherAnalytics() {
           icon={<Target size={20} />}
           label="Promedio del curso"
           value={stats?.promedio_curso ? `${stats.promedio_curso}%` : '—'}
-          iconBg="bg-primary-100" iconColor="text-primary-600"
+          iconBg="bg-blue-100" iconColor="text-blue-600"
         />
         <StatCard
           icon={<BarChart3 size={20} />}
@@ -102,7 +102,7 @@ export default function TeacherAnalytics() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             {/* Weekly evolution */}
             <div className="card lg:col-span-2">
-              <h3 className="font-semibold text-navy-900 mb-1">Evolución semanal</h3>
+              <h3 className="font-semibold text-slate-900 mb-1">Evolución semanal</h3>
               <p className="text-xs text-slate-400 mb-4">Promedio del curso por semana</p>
               {weeklyData.length > 1 ? (
                 <ResponsiveContainer width="100%" height={200}>
@@ -124,7 +124,7 @@ export default function TeacherAnalytics() {
 
             {/* Radar */}
             <div className="card">
-              <h3 className="font-semibold text-navy-900 mb-4">Puntaje por área</h3>
+              <h3 className="font-semibold text-slate-900 mb-4">Puntaje por área</h3>
               {radarData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <RadarChart data={radarData}>
@@ -143,7 +143,7 @@ export default function TeacherAnalytics() {
           {/* Area breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="card">
-              <h3 className="font-semibold text-navy-900 mb-4">Desempeño por área</h3>
+              <h3 className="font-semibold text-slate-900 mb-4">Desempeño por área</h3>
               <div className="space-y-4">
                 {areaData.map((d) => (
                   <div key={d.area}>
@@ -164,7 +164,7 @@ export default function TeacherAnalytics() {
               </div>
 
               {stats?.area_mas_debil && (
-                <div className="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2">
+                <div className="mt-4 p-3 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-2">
                   <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-700">
                     Área más débil: <strong>{AREA_LABELS[stats.area_mas_debil as QuestionArea]}</strong>.
@@ -176,7 +176,7 @@ export default function TeacherAnalytics() {
 
             {/* Most failed questions */}
             <div className="card">
-              <h3 className="font-semibold text-navy-900 mb-4 flex items-center gap-2">
+              <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <AlertCircle size={17} className="text-red-500" />
                 Preguntas más falladas
               </h3>
@@ -185,7 +185,7 @@ export default function TeacherAnalytics() {
               ) : (
                 <div className="space-y-3">
                   {stats.preguntas_mas_falladas.slice(0, 8).map((q: any, i: number) => (
-                    <div key={q.question_id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div key={q.question_id} className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors">
                       <div className={clsx(
                         'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
                         q.tasa_error >= 70 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
@@ -214,8 +214,8 @@ export default function TeacherAnalytics() {
 
           {/* Ranking */}
           <div className="card">
-            <h3 className="font-semibold text-navy-900 mb-6 flex items-center gap-2">
-              <Trophy size={18} className="text-gold-500" />
+            <h3 className="font-semibold text-slate-900 mb-6 flex items-center gap-2">
+              <Trophy size={18} className="text-amber-500" />
               Ranking de estudiantes
             </h3>
             {(stats?.ranking ?? []).length === 0 ? (
@@ -226,13 +226,13 @@ export default function TeacherAnalytics() {
                   <div
                     key={student.student_id}
                     className={clsx(
-                      'flex items-center gap-4 p-3 rounded-xl transition-colors',
-                      student.posicion <= 3 ? 'bg-gold-50 border border-gold-100' : 'hover:bg-slate-50'
+                      'flex items-center gap-4 p-3 rounded-2xl transition-colors',
+                      student.posicion <= 3 ? 'bg-amber-100 border border-amber-400' : 'hover:bg-slate-50'
                     )}
                   >
                     <div className={clsx(
                       'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
-                      student.posicion === 1 ? 'bg-gold-500 text-white'
+                      student.posicion === 1 ? 'bg-amber-100 text-white'
                       : student.posicion === 2 ? 'bg-slate-400 text-white'
                       : student.posicion === 3 ? 'bg-amber-600 text-white'
                       : 'bg-slate-100 text-slate-600'
@@ -240,12 +240,12 @@ export default function TeacherAnalytics() {
                       {student.posicion <= 3 ? RANK_ICONS[student.posicion - 1] : student.posicion}
                     </div>
 
-                    <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center text-sm font-bold text-primary-700 flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600 flex-shrink-0">
                       {student.full_name?.charAt(0).toUpperCase()}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-navy-900 truncate">{student.full_name}</p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{student.full_name}</p>
                       <p className="text-xs text-slate-400">{student.simulacros} simulacro(s)</p>
                     </div>
 

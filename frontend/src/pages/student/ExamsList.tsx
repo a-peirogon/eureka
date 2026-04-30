@@ -1,25 +1,24 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { FileText, Clock, BookOpen, Play, ChevronRight, Trophy } from 'lucide-react'
+import { FileText, Clock, BookOpen, Play, Trophy, CheckCircle2 } from 'lucide-react'
 import clsx from 'clsx'
 import { examsApi } from '@/lib/api'
 import { AppLayout, TopHeader, LoadingPage, EmptyState, ScoreRing } from '@/components/ui'
 import { AREA_LABELS, type QuestionArea } from '@/types'
 
 export default function StudentExamsList() {
-  const { data: examsData, isLoading: loadingExams } = useQuery({
+  const { data: examsData, isLoading } = useQuery({
     queryKey: ['exams', 'public'],
-    queryFn: () => examsApi.list({ limit: 50 }),
+    queryFn:  () => examsApi.list({ limit: 50 }),
     staleTime: 60_000,
   })
-
   const { data: attemptsData } = useQuery({
     queryKey: ['my-attempts'],
-    queryFn: examsApi.myAttempts,
+    queryFn:  examsApi.myAttempts,
     staleTime: 30_000,
   })
 
-  if (loadingExams) return <AppLayout><LoadingPage /></AppLayout>
+  if (isLoading) return <AppLayout><LoadingPage /></AppLayout>
 
   const exams = examsData?.items ?? []
   const attemptMap: Record<string, any> = {}
@@ -45,20 +44,26 @@ export default function StudentExamsList() {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {exams.map((exam: any) => {
-            const attempt = attemptMap[exam.id]
+            const attempt   = attemptMap[exam.id]
             const completed = attempt?.status === 'completado'
+            const inProgress = attempt?.status === 'en_progreso'
 
             return (
-              <div key={exam.id} className="card flex flex-col gap-4">
+              <div key={exam.id} className="card flex flex-col gap-4 hover:shadow-card-md hover:-translate-y-0.5 transition-all duration-200">
                 {/* Header */}
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <FileText size={18} className="text-primary-600" />
+                  <div className={clsx(
+                    'w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0',
+                    completed ? 'bg-emerald-100' : 'bg-blue-100'
+                  )}>
+                    {completed
+                      ? <CheckCircle2 size={20} className="text-emerald-600" />
+                      : <FileText size={20} className="text-blue-600" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-navy-900 line-clamp-2">{exam.title}</h3>
+                    <h3 className="font-semibold text-slate-900 line-clamp-2 leading-snug">{exam.title}</h3>
                     {exam.description && (
                       <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{exam.description}</p>
                     )}
@@ -68,11 +73,11 @@ export default function StudentExamsList() {
                   )}
                 </div>
 
-                {/* Area config */}
+                {/* Area pills */}
                 {exam.areas_config && Object.keys(exam.areas_config).length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1.5">
                     {Object.entries(exam.areas_config).map(([a, n]) => (
-                      <span key={a} className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">
+                      <span key={a} className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">
                         {AREA_LABELS[a as QuestionArea]?.split(' ')[0]}: {n as number}
                       </span>
                     ))}
@@ -81,62 +86,53 @@ export default function StudentExamsList() {
 
                 {/* Meta */}
                 <div className="flex items-center gap-4 text-xs text-slate-400">
-                  <span className="flex items-center gap-1"><BookOpen size={12} /> {exam.question_count} preguntas</span>
-                  <span className="flex items-center gap-1"><Clock size={12} /> {exam.duration_min} min</span>
+                  <span className="flex items-center gap-1.5"><BookOpen size={12} /> {exam.question_count} preguntas</span>
+                  <span className="flex items-center gap-1.5"><Clock size={12} /> {exam.duration_min} min</span>
                 </div>
 
-                {/* Score by area if completed */}
+                {/* Score breakdown if completed */}
                 {completed && attempt.score_by_area && (
-                  <div className="space-y-1.5 bg-slate-50 rounded-xl p-3">
+                  <div className="space-y-1.5 bg-slate-50 rounded-2xl p-3 border border-slate-100">
                     {Object.entries(attempt.score_by_area).map(([area, pct]) => (
                       <div key={area} className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500 w-20 truncate">
+                        <span className="text-[11px] text-slate-500 w-20 truncate">
                           {AREA_LABELS[area as QuestionArea]?.split(' ')[0]}
                         </span>
                         <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
                           <div
-                            className={clsx(
-                              'h-full rounded-full',
-                              Number(pct) >= 70 ? 'bg-emerald-500' : Number(pct) >= 50 ? 'bg-amber-500' : 'bg-red-400'
+                            className={clsx('h-full rounded-full transition-all duration-700',
+                              Number(pct) >= 70 ? 'bg-emerald-500' : Number(pct) >= 50 ? 'bg-amber-400' : 'bg-red-400'
                             )}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-medium w-8 text-right">{Number(pct).toFixed(0)}%</span>
+                        <span className="text-[11px] font-semibold w-8 text-right text-slate-700">{Number(pct).toFixed(0)}%</span>
                       </div>
                     ))}
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-auto">
+                <div className="flex gap-2 mt-auto pt-1">
                   {completed ? (
                     <>
-                      <Link
-                        to={`/student/results/${exam.id}/${attempt.id}`}
-                        className="btn-secondary text-xs flex-1 justify-center"
-                      >
+                      <Link to={`/student/results/${exam.id}/${attempt.id}`}
+                            className="btn-secondary text-xs flex-1 justify-center py-2">
                         <Trophy size={13} /> Ver resultados
                       </Link>
-                      <Link
-                        to={`/student/exam/${exam.id}`}
-                        className="btn-outline text-xs flex-1 justify-center"
-                      >
+                      <Link to={`/student/exam/${exam.id}`}
+                            className="btn-outline text-xs flex-1 justify-center py-2">
                         Reintentar
                       </Link>
                     </>
-                  ) : attempt?.status === 'en_progreso' ? (
-                    <Link
-                      to={`/student/exam/${exam.id}`}
-                      className="btn-gold text-sm flex-1 justify-center"
-                    >
+                  ) : inProgress ? (
+                    <Link to={`/student/exam/${exam.id}`}
+                          className="btn-gold text-sm flex-1 justify-center">
                       <Play size={14} /> Continuar
                     </Link>
                   ) : (
-                    <Link
-                      to={`/student/exam/${exam.id}`}
-                      className="btn-primary text-sm flex-1 justify-center"
-                    >
+                    <Link to={`/student/exam/${exam.id}`}
+                          className="btn-primary text-sm flex-1 justify-center">
                       <Play size={14} /> Iniciar simulacro
                     </Link>
                   )}
