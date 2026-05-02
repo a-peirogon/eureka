@@ -144,7 +144,7 @@ export default function AdminUsers() {
                   <tr key={u.id}>
                     <td>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className="w-8 h-8 bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
                           {u.full_name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -185,7 +185,7 @@ export default function AdminUsers() {
                         {u.is_active ? (
                           <button
                             onClick={() => setDeactivateId(u.id)}
-                            className="btn-ghost p-1.5 rounded-lg text-red-400 hover:bg-red-50 text-xs flex items-center gap-1"
+                            className="btn-ghost p-1.5 text-red-400 hover:bg-red-50 text-xs flex items-center gap-1"
                             title="Desactivar"
                           >
                             <UserX size={14} />
@@ -194,7 +194,7 @@ export default function AdminUsers() {
                           <button
                             onClick={() => activateMut.mutate(u.id)}
                             disabled={activateMut.isPending}
-                            className="btn-ghost p-1.5 rounded-lg text-emerald-500 hover:bg-emerald-50"
+                            className="btn-ghost p-1.5 text-emerald-500 hover:bg-emerald-50"
                             title="Activar"
                           >
                             <UserCheck size={14} />

@@ -85,10 +85,10 @@ function QuestionForm({ initial, onSave, onClose }: {
               type="button"
               onClick={() => setCorrecta(opt.letra)}
               className={clsx(
-                'w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm flex-shrink-0',
+                'w-8 h-8 border-2 flex items-center justify-center font-bold text-sm flex-shrink-0',
                 correcta === opt.letra
                   ? 'border-emerald-500 bg-emerald-500 text-white'
-                  : 'border-slate-300 text-slate-500 hover:border-emerald-400'
+                  : 'border-slate-300 text-[var(--text-muted)] hover:border-emerald-400'
               )}
               title={`Marcar ${opt.letra} como correcta`}
             >
@@ -104,7 +104,7 @@ function QuestionForm({ initial, onSave, onClose }: {
             />
           </div>
         ))}
-        <p className="text-xs text-slate-400">Haz clic en la letra para marcarla como respuesta correcta</p>
+        <p className="text-xs text-[var(--text-subtle)]">Haz clic en la letra para marcarla como respuesta correcta</p>
       </div>
 
       <div>
@@ -152,7 +152,7 @@ function AIGenerateForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-blue-600 rounded-2xl border border-blue-400 text-sm text-blue-600">
+      <div className="p-4 bg-blue-600 border border-blue-400 text-sm text-blue-600">
         La IA generará una pregunta original basada en los parámetros que definas. Se guardará como <strong>borrador</strong> para que la revises antes de aprobarla.
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -255,7 +255,7 @@ export default function TeacherQuestions() {
       <div className="card mb-6">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)]" />
             <input
               className="input pl-9"
               placeholder="Buscar por enunciado o competencia..."
@@ -279,7 +279,7 @@ export default function TeacherQuestions() {
           </select>
           {(search || filterArea || filterStatus || filterDiff) && (
             <button onClick={() => { setSearch(''); setFilterArea(''); setFilterStatus(''); setFilterDiff(''); setPage(1) }}
-              className="btn-ghost text-slate-500 text-sm">
+              className="btn-ghost text-[var(--text-muted)] text-sm">
               <RefreshCw size={13} /> Limpiar
             </button>
           )}
@@ -318,13 +318,13 @@ export default function TeacherQuestions() {
                   <tr key={q.id}>
                     <td className="max-w-xs">
                       <p className="line-clamp-2 text-sm">{q.enunciado}</p>
-                      {q.competencia && <p className="text-xs text-slate-400 mt-0.5">{q.competencia}</p>}
+                      {q.competencia && <p className="text-xs text-[var(--text-subtle)] mt-0.5">{q.competencia}</p>}
                     </td>
                     <td><AreaBadge area={q.area} /></td>
                     <td><DifficultyBadge difficulty={q.difficulty} /></td>
                     <td><QuestionStatusBadge status={q.status} /></td>
                     <td>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--text-muted)]">
                         {q.times_used > 0 ? `${q.accuracy_rate ?? 0}% (${q.times_used})` : '—'}
                       </span>
                     </td>
@@ -339,16 +339,16 @@ export default function TeacherQuestions() {
                     </td>
                     <td>
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => setViewQ(q)} className="btn-ghost p-1.5 rounded-lg" title="Ver">
+                        <button onClick={() => setViewQ(q)} className="btn-ghost p-1.5" title="Ver">
                           <Eye size={14} />
                         </button>
-                        <button onClick={() => setEditQ(q)} className="btn-ghost p-1.5 rounded-lg" title="Editar">
+                        <button onClick={() => setEditQ(q)} className="btn-ghost p-1.5" title="Editar">
                           <Edit3 size={14} />
                         </button>
                         {q.status === 'borrador' && (
                           <button
                             onClick={() => statusMut.mutate({ id: q.id, status: 'aprobado' })}
-                            className="btn-ghost p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50"
+                            className="btn-ghost p-1.5 text-emerald-600 hover:bg-emerald-50"
                             title="Aprobar"
                           >
                             <CheckCircle size={14} />
@@ -357,7 +357,7 @@ export default function TeacherQuestions() {
                         {q.status === 'aprobado' && (
                           <button
                             onClick={() => statusMut.mutate({ id: q.id, status: 'archivado' })}
-                            className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:bg-slate-100"
+                            className="btn-ghost p-1.5 text-[var(--text-subtle)] hover:bg-[var(--surface-2)]"
                             title="Archivar"
                           >
                             <Archive size={14} />
@@ -365,7 +365,7 @@ export default function TeacherQuestions() {
                         )}
                         <button
                           onClick={() => setDeleteId(q.id)}
-                          className="btn-ghost p-1.5 rounded-lg text-red-400 hover:bg-red-50"
+                          className="btn-ghost p-1.5 text-red-400 hover:bg-red-50"
                           title="Eliminar"
                         >
                           <Trash2 size={14} />
@@ -425,11 +425,11 @@ export default function TeacherQuestions() {
             <div className="space-y-2">
               {viewQ.opciones?.map((opt) => (
                 <div key={opt.letra} className={clsx(
-                  'flex items-start gap-3 p-3 rounded-2xl border',
-                  opt.letra === viewQ.respuesta_correcta ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100'
+                  'flex items-start gap-3 p-3 border',
+                  opt.letra === viewQ.respuesta_correcta ? 'bg-emerald-50 border-emerald-200' : 'bg-[var(--surface-2)] border-[var(--border)]'
                 )}>
                   <span className={clsx(
-                    'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0',
+                    'w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0',
                     opt.letra === viewQ.respuesta_correcta ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'
                   )}>{opt.letra}</span>
                   <span className="text-sm">{opt.texto}</span>
@@ -437,7 +437,7 @@ export default function TeacherQuestions() {
               ))}
             </div>
             {viewQ.explicacion && (
-              <div className="p-4 bg-blue-600 rounded-2xl border border-blue-400 text-sm text-slate-700">
+              <div className="p-4 bg-blue-600 border border-blue-400 text-sm text-slate-700">
                 <p className="font-semibold text-blue-600 mb-1">💡 Explicación</p>
                 {viewQ.explicacion}
               </div>

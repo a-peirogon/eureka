@@ -96,13 +96,13 @@ export default function App() {
         position="top-right"
         toastOptions={{
           style: {
-            borderRadius: '2px',
+            borderRadius: '0px',
             fontSize: '14px',
-            fontFamily: '"Source Sans 3", Georgia, serif',
-            boxShadow: '0 2px 12px rgba(0,0,0,.12)',
-            border: '1px solid #d8d0c0',
-            background: '#fdfcf8',
-            color: '#1c1a16',
+            fontFamily: '"Source Serif 4", Georgia, serif',
+            boxShadow: '3px 3px 0 rgba(0,0,0,0.12)',
+            border: '1px solid var(--border-strong)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
           },
           success: { style: { background: '#f0f7f3', color: '#276749', border: '1px solid #a7d4b8' } },
           error:   { style: { background: '#fdf0f0', color: '#8b2c2c', border: '1px solid #d4a4a4' } },

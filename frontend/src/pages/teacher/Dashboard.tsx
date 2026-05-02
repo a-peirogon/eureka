@@ -73,13 +73,13 @@ export default function TeacherDashboard() {
 
         {/* Quick actions */}
         <div className="card">
-          <h3 className="font-semibold text-slate-800 mb-4 text-sm uppercase tracking-wide text-slate-500">Acciones rápidas</h3>
+          <h3 className="font-semibold text-slate-800 mb-4 text-sm uppercase tracking-wide text-[var(--text-muted)]">Acciones rápidas</h3>
           <div className="space-y-2.5">
             {quickActions.map((a) => (
               <Link
                 key={a.label}
                 to={a.to}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white text-sm font-semibold transition-all hover:-translate-y-px"
+                className="flex items-center gap-3 px-4 py-3 text-white text-sm font-semibold transition-all hover:-translate-y-px"
                 style={{ background: a.gradient, boxShadow: `0 2px 8px ${a.shadow}` }}
               >
                 <span className="opacity-90">{a.icon}</span>
@@ -93,7 +93,7 @@ export default function TeacherDashboard() {
         {/* Questions by area */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Preguntas por área</h3>
+            <h3 className="font-semibold text-[var(--text)]">Preguntas por área</h3>
             <Link to="/teacher/questions" className="text-blue-600 text-xs hover:underline font-medium">Ver todas</Link>
           </div>
           <div className="space-y-3.5">
@@ -105,9 +105,9 @@ export default function TeacherDashboard() {
                     <span className="text-slate-600">{AREA_LABELS[area as QuestionArea] ?? area}</span>
                     <span className="font-semibold text-slate-800">{count as number}</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[var(--surface-2)] overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-700"
+                      className="h-full transition-all duration-700"
                       style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#3b82f6,#6366f1)' }}
                     />
                   </div>
@@ -115,7 +115,7 @@ export default function TeacherDashboard() {
               )
             })}
             {Object.keys(qStats?.by_area ?? {}).length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">Sin preguntas aún</p>
+              <p className="text-sm text-[var(--text-subtle)] text-center py-4">Sin preguntas aún</p>
             )}
           </div>
         </div>
@@ -123,18 +123,18 @@ export default function TeacherDashboard() {
         {/* Recent exams */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Simulacros recientes</h3>
+            <h3 className="font-semibold text-[var(--text)]">Simulacros recientes</h3>
             <Link to="/teacher/exams" className="text-blue-600 text-xs hover:underline font-medium">Ver todos</Link>
           </div>
           <div className="space-y-2">
             {(examsData?.items ?? []).slice(0, 5).map((e: any) => (
-              <div key={e.id} className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer">
-                <div className="w-9 h-9 bg-indigo-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div key={e.id} className="flex items-center gap-3 p-2.5 hover:bg-[var(--surface-2)] transition-colors cursor-pointer">
+                <div className="w-9 h-9 bg-indigo-100 flex items-center justify-center flex-shrink-0">
                   <FileText size={15} className="text-indigo-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{e.title}</p>
-                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                  <p className="text-xs text-[var(--text-subtle)] flex items-center gap-1 mt-0.5">
                     <Clock size={10} /> {e.duration_min} min · {e.question_count} preg.
                   </p>
                 </div>
@@ -142,7 +142,7 @@ export default function TeacherDashboard() {
               </div>
             ))}
             {(examsData?.items ?? []).length === 0 && (
-              <p className="text-sm text-slate-400 text-center py-4">Sin simulacros aún</p>
+              <p className="text-sm text-[var(--text-subtle)] text-center py-4">Sin simulacros aún</p>
             )}
           </div>
         </div>
@@ -150,11 +150,11 @@ export default function TeacherDashboard() {
 
       {/* Pending drafts alert */}
       {(qStats?.by_status?.borrador ?? 0) > 0 && (
-        <div className="mt-6 rounded-2xl border border-amber-200 overflow-hidden"
+        <div className="mt-6 border border-amber-200 overflow-hidden"
              style={{ background: 'linear-gradient(135deg, #fffbeb, #fef3c7)' }}>
           <div className="p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-amber-100 flex items-center justify-center flex-shrink-0">
                 <Clock size={18} className="text-amber-600" />
               </div>
               <div>

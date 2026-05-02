@@ -55,7 +55,7 @@ export default function StudentExamsList() {
                 {/* Header */}
                 <div className="flex items-start gap-3">
                   <div className={clsx(
-                    'w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0',
+                    'w-11 h-11 flex items-center justify-center flex-shrink-0',
                     completed ? 'bg-emerald-100' : 'bg-blue-100'
                   )}>
                     {completed
@@ -63,9 +63,9 @@ export default function StudentExamsList() {
                       : <FileText size={20} className="text-blue-600" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-900 line-clamp-2 leading-snug">{exam.title}</h3>
+                    <h3 className="font-semibold text-[var(--text)] line-clamp-2 leading-snug">{exam.title}</h3>
                     {exam.description && (
-                      <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{exam.description}</p>
+                      <p className="text-xs text-[var(--text-subtle)] mt-0.5 line-clamp-1">{exam.description}</p>
                     )}
                   </div>
                   {completed && (
@@ -77,7 +77,7 @@ export default function StudentExamsList() {
                 {exam.areas_config && Object.keys(exam.areas_config).length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {Object.entries(exam.areas_config).map(([a, n]) => (
-                      <span key={a} className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">
+                      <span key={a} className="text-[11px] bg-[var(--surface-2)] text-[var(--text-muted)] px-2 py-0.5 font-medium">
                         {AREA_LABELS[a as QuestionArea]?.split(' ')[0]}: {n as number}
                       </span>
                     ))}
@@ -85,22 +85,22 @@ export default function StudentExamsList() {
                 )}
 
                 {/* Meta */}
-                <div className="flex items-center gap-4 text-xs text-slate-400">
+                <div className="flex items-center gap-4 text-xs text-[var(--text-subtle)]">
                   <span className="flex items-center gap-1.5"><BookOpen size={12} /> {exam.question_count} preguntas</span>
                   <span className="flex items-center gap-1.5"><Clock size={12} /> {exam.duration_min} min</span>
                 </div>
 
                 {/* Score breakdown if completed */}
                 {completed && attempt.score_by_area && (
-                  <div className="space-y-1.5 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                  <div className="space-y-1.5 bg-[var(--surface-2)] p-3 border border-[var(--border)]">
                     {Object.entries(attempt.score_by_area).map(([area, pct]) => (
                       <div key={area} className="flex items-center gap-2">
-                        <span className="text-[11px] text-slate-500 w-20 truncate">
+                        <span className="text-[11px] text-[var(--text-muted)] w-20 truncate">
                           {AREA_LABELS[area as QuestionArea]?.split(' ')[0]}
                         </span>
-                        <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-slate-200 overflow-hidden">
                           <div
-                            className={clsx('h-full rounded-full transition-all duration-700',
+                            className={clsx('h-full transition-all duration-700',
                               Number(pct) >= 70 ? 'bg-emerald-500' : Number(pct) >= 50 ? 'bg-amber-400' : 'bg-red-400'
                             )}
                             style={{ width: `${pct}%` }}

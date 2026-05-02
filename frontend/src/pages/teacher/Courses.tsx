@@ -110,27 +110,27 @@ function EnrollModal({ course, onClose }: { course: Course; onClose: () => void 
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-subtle)]" />
         <input className="input pl-9" placeholder="Buscar estudiantes..."
           value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      <div className="max-h-56 overflow-y-auto border border-slate-100 rounded-2xl divide-y divide-slate-50">
+      <div className="max-h-56 overflow-y-auto border border-[var(--border)] divide-y divide-slate-50">
         {(usersData?.items ?? []).map((u: any) => (
-          <label key={u.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer">
+          <label key={u.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--surface-2)] cursor-pointer">
             <input type="checkbox" checked={selected.includes(u.id)} onChange={() => toggle(u.id)}
               className="accent-blue-600" />
-            <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
               {u.full_name?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-900">{u.full_name}</p>
-              <p className="text-xs text-slate-400">{u.email}</p>
+              <p className="text-sm font-medium text-[var(--text)]">{u.full_name}</p>
+              <p className="text-xs text-[var(--text-subtle)]">{u.email}</p>
             </div>
           </label>
         ))}
         {(usersData?.items ?? []).length === 0 && (
-          <p className="text-center text-xs text-slate-400 py-6">Sin estudiantes encontrados</p>
+          <p className="text-center text-xs text-[var(--text-subtle)] py-6">Sin estudiantes encontrados</p>
         )}
       </div>
 
@@ -194,25 +194,25 @@ export default function TeacherCourses() {
           {(courses ?? []).map((c: Course) => (
             <div key={c.id} className="card flex flex-col gap-3">
               <div className="flex items-start justify-between">
-                <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-emerald-100 flex items-center justify-center flex-shrink-0">
                   <GraduationCap size={18} className="text-emerald-600" />
                 </div>
-                <button onClick={() => setDeleteId(c.id)} className="btn-ghost p-1.5 rounded-lg text-slate-300 hover:text-red-400">
+                <button onClick={() => setDeleteId(c.id)} className="btn-ghost p-1.5 text-slate-300 hover:text-red-400">
                   <Trash2 size={14} />
                 </button>
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-900">{c.name}</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <h3 className="font-semibold text-[var(--text)]">{c.name}</h3>
+                <p className="text-xs text-[var(--text-subtle)] mt-0.5">
                   {c.grade ? `Grado ${c.grade}°` : ''} {c.school_year ? `· ${c.school_year}` : ''}
                 </p>
                 {c.description && (
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{c.description}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{c.description}</p>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] border-t border-[var(--border)] pt-3">
                 <Users size={12} />
                 <span>{c.student_count} estudiante(s)</span>
               </div>

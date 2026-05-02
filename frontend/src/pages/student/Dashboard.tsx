@@ -76,7 +76,7 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Evolution chart */}
         <div className="card lg:col-span-2">
-          <h3 className="font-semibold text-slate-900 mb-5">Evolución de puntajes</h3>
+          <h3 className="font-semibold text-[var(--text)] mb-5">Evolución de puntajes</h3>
           {evolData.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={evolData}>
@@ -84,7 +84,7 @@ export default function StudentDashboard() {
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    borderRadius: 16, border: 'none',
+                    borderRadius: 0, border: 'none',
                     boxShadow: '0 10px 25px rgba(0,0,0,.10)',
                     fontSize: 12,
                   }}
@@ -92,9 +92,9 @@ export default function StudentDashboard() {
                 />
                 <Line
                   type="monotone" dataKey="score"
-                  stroke="#6366f1" strokeWidth={2.5}
-                  dot={{ fill: '#6366f1', r: 4, strokeWidth: 0 }}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff' }}
+                  stroke="var(--primary)" strokeWidth={2.5}
+                  dot={{ fill: 'var(--primary)', r: 4, strokeWidth: 0 }}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: 'white' }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -109,7 +109,7 @@ export default function StudentDashboard() {
 
         {/* Score ring + area breakdown */}
         <div className="card flex flex-col">
-          <h3 className="font-semibold text-slate-900 mb-4">Puntaje global</h3>
+          <h3 className="font-semibold text-[var(--text)] mb-4">Puntaje global</h3>
           {stats?.puntaje_promedio ? (
             <>
               <div className="flex justify-center mb-5">
@@ -119,7 +119,7 @@ export default function StudentDashboard() {
                 {Object.entries(stats.por_area ?? {}).map(([area, pct]) => (
                   <div key={area}>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">{AREA_LABELS[area as QuestionArea] ?? area}</span>
+                      <span className="text-[var(--text-muted)]">{AREA_LABELS[area as QuestionArea] ?? area}</span>
                       <span className="font-semibold text-slate-700">{Number(pct).toFixed(0)}%</span>
                     </div>
                     <ProgressBar value={Number(pct)} max={100} className="h-1.5"
@@ -141,7 +141,7 @@ export default function StudentDashboard() {
             <div className="flex items-start gap-3">
               <AlertCircle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-slate-900 mb-1">Área a reforzar</h4>
+                <h4 className="font-semibold text-[var(--text)] mb-1">Área a reforzar</h4>
                 <p className="text-slate-600 text-sm leading-relaxed">
                   Tu puntaje más bajo es en{' '}
                   <span className="font-semibold text-amber-700">
@@ -160,7 +160,7 @@ export default function StudentDashboard() {
         {/* Recent attempts */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-900">Últimos simulacros</h3>
+            <h3 className="font-semibold text-[var(--text)]">Últimos simulacros</h3>
             <Link to="/student/results" className="text-blue-600 text-xs hover:underline font-medium flex items-center gap-1">
               Ver todos <ChevronRight size={14} />
             </Link>
@@ -170,11 +170,11 @@ export default function StudentDashboard() {
           ) : (
             <div className="space-y-2">
               {recentAttempts.map((a: any) => (
-                <div key={a.id} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div key={a.id} className="flex items-center gap-3 p-3 hover:bg-[var(--surface-2)] transition-colors">
                   <ScoreRing score={a.score_global ?? 0} size={44} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">{a.exam_title ?? 'Simulacro'}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-[var(--text-subtle)] mt-0.5">
                       {a.finished_at
                         ? formatDistanceToNow(new Date(a.finished_at), { addSuffix: true, locale: es })
                         : 'En progreso'}
@@ -191,7 +191,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* CTA banner */}
-      <div className="mt-6 rounded-2xl p-6 flex items-center justify-between gap-4 overflow-hidden relative"
+      <div className="mt-6 p-6 flex items-center justify-between gap-4 overflow-hidden relative"
            style={{ background: 'linear-gradient(135deg, #2563eb 0%, #6366f1 100%)' }}>
         {/* Decoration */}
         <div className="absolute right-0 top-0 w-64 h-full opacity-10"

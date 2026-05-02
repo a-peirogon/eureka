@@ -48,7 +48,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="p-3 bg-purple-50 border border-purple-100 rounded-2xl text-xs text-purple-700">
+      <div className="p-3 bg-purple-50 border border-purple-100 text-xs text-purple-700">
         El sistema seleccionará preguntas aprobadas aleatoriamente según la distribución que definas.
       </div>
 
@@ -72,7 +72,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
           >
             {isPublic
               ? <ToggleRight size={22} className="text-blue-600" />
-              : <ToggleLeft size={22} className="text-slate-400" />
+              : <ToggleLeft size={22} className="text-[var(--text-subtle)]" />
             }
             {isPublic ? 'Público' : 'Solo con enlace'}
           </button>
@@ -82,7 +82,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
       <div>
         <div className="flex justify-between mb-2">
           <label className="label mb-0">Preguntas por área</label>
-          <span className="text-xs text-slate-400">Total: <strong>{total}</strong> preguntas</span>
+          <span className="text-xs text-[var(--text-subtle)]">Total: <strong>{total}</strong> preguntas</span>
         </div>
         <div className="space-y-3">
           {AREAS.map((a) => (
@@ -93,7 +93,7 @@ function AutoExamForm({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setConfig({ ...config, [a]: Number(e.target.value) })}
                 className="flex-1 accent-blue-600"
               />
-              <span className="w-8 text-center text-sm font-semibold text-slate-900">{config[a] ?? 0}</span>
+              <span className="w-8 text-center text-sm font-semibold text-[var(--text)]">{config[a] ?? 0}</span>
             </div>
           ))}
         </div>
@@ -159,7 +159,7 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex items-end pb-1">
           <button type="button" onClick={() => setIsPublic(!isPublic)} className="flex items-center gap-2 text-sm text-slate-600">
-            {isPublic ? <ToggleRight size={22} className="text-blue-600" /> : <ToggleLeft size={22} className="text-slate-400" />}
+            {isPublic ? <ToggleRight size={22} className="text-blue-600" /> : <ToggleLeft size={22} className="text-[var(--text-subtle)]" />}
             {isPublic ? 'Público' : 'Privado'}
           </button>
         </div>
@@ -168,7 +168,7 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="label mb-0">Seleccionar preguntas</label>
-          <span className="text-xs text-slate-400">{selectedIds.length} seleccionadas</span>
+          <span className="text-xs text-[var(--text-subtle)]">{selectedIds.length} seleccionadas</span>
         </div>
         <div className="flex gap-2 mb-3">
           <input className="input text-sm flex-1" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -177,23 +177,23 @@ function ManualExamForm({ onClose }: { onClose: () => void }) {
             {AREAS.map((a) => <option key={a} value={a}>{AREA_LABELS[a].split(' ')[0]}</option>)}
           </select>
         </div>
-        <div className="max-h-52 overflow-y-auto space-y-1.5 border border-slate-100 rounded-2xl p-2">
+        <div className="max-h-52 overflow-y-auto space-y-1.5 border border-[var(--border)] p-2">
           {(qData?.items ?? []).map((q: any) => (
-            <label key={q.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-slate-50 cursor-pointer">
+            <label key={q.id} className="flex items-start gap-3 p-2.5 hover:bg-[var(--surface-2)] cursor-pointer">
               <input type="checkbox" checked={selectedIds.includes(q.id)}
                 onChange={() => toggle(q.id)} className="mt-0.5 accent-blue-600" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-700 line-clamp-1">{q.enunciado}</p>
                 <div className="flex gap-1.5 mt-0.5">
-                  <span className="text-[10px] text-slate-400">{AREA_LABELS[q.area as QuestionArea]?.split(' ')[0]}</span>
+                  <span className="text-[10px] text-[var(--text-subtle)]">{AREA_LABELS[q.area as QuestionArea]?.split(' ')[0]}</span>
                   <span className="text-[10px] text-slate-300">·</span>
-                  <span className="text-[10px] text-slate-400">Dif. {q.difficulty}</span>
+                  <span className="text-[10px] text-[var(--text-subtle)]">Dif. {q.difficulty}</span>
                 </div>
               </div>
             </label>
           ))}
           {(qData?.items ?? []).length === 0 && (
-            <p className="text-center text-xs text-slate-400 py-4">No hay preguntas aprobadas disponibles</p>
+            <p className="text-center text-xs text-[var(--text-subtle)] py-4">No hay preguntas aprobadas disponibles</p>
           )}
         </div>
       </div>
@@ -287,8 +287,8 @@ export default function TeacherExams() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {exam.auto_generated
-                    ? <div className="w-8 h-8 bg-purple-100 rounded-2xl flex items-center justify-center"><Wand2 size={15} className="text-purple-600" /></div>
-                    : <div className="w-8 h-8 bg-blue-100 rounded-2xl flex items-center justify-center"><FileText size={15} className="text-blue-600" /></div>
+                    ? <div className="w-8 h-8 bg-purple-100 flex items-center justify-center"><Wand2 size={15} className="text-purple-600" /></div>
+                    : <div className="w-8 h-8 bg-blue-100 flex items-center justify-center"><FileText size={15} className="text-blue-600" /></div>
                   }
                   <button
                     onClick={() => visibilityMut.mutate({ id: exam.id, is_public: !exam.is_public })}
@@ -298,26 +298,26 @@ export default function TeacherExams() {
                       'badge text-xs cursor-pointer border transition-colors',
                       exam.is_public
                         ? 'badge-green border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                        : 'badge-gray border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
+                        : 'badge-gray border-[var(--border)] hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
                     )}
                   >
                     {exam.is_public ? '● Público' : '○ Privado — publicar'}
                   </button>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => setViewExam(exam)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-blue-600">
+                  <button onClick={() => setViewExam(exam)} className="btn-ghost p-1.5 text-[var(--text-subtle)] hover:text-blue-600">
                     <Eye size={14} />
                   </button>
-                  <button onClick={() => setDeleteId(exam.id)} className="btn-ghost p-1.5 rounded-lg text-slate-400 hover:text-red-500">
+                  <button onClick={() => setDeleteId(exam.id)} className="btn-ghost p-1.5 text-[var(--text-subtle)] hover:text-red-500">
                     <Trash2 size={14} />
                   </button>
                 </div>
               </div>
 
-              <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">{exam.title}</h3>
-              {exam.description && <p className="text-xs text-slate-400 mb-3 line-clamp-2">{exam.description}</p>}
+              <h3 className="font-semibold text-[var(--text)] mb-1 line-clamp-2">{exam.title}</h3>
+              {exam.description && <p className="text-xs text-[var(--text-subtle)] mb-3 line-clamp-2">{exam.description}</p>}
 
-              <div className="flex items-center gap-4 text-xs text-slate-500 border-t border-slate-100 pt-3 mt-auto">
+              <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] border-t border-[var(--border)] pt-3 mt-auto">
                 <span className="flex items-center gap-1"><BookOpen size={12} /> {exam.question_count} preg.</span>
                 <span className="flex items-center gap-1"><Clock size={12} /> {exam.duration_min} min</span>
                 {exam.auto_generated && (
@@ -328,7 +328,7 @@ export default function TeacherExams() {
               {exam.areas_config && Object.keys(exam.areas_config).length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {Object.entries(exam.areas_config).map(([a, n]) => (
-                    <span key={a} className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">
+                    <span key={a} className="text-[10px] bg-[var(--surface-2)] text-[var(--text-muted)] px-1.5 py-0.5 rounded-full">
                       {AREA_LABELS[a as QuestionArea]?.split(' ')[0]}: {n as number}
                     </span>
                   ))}
@@ -361,14 +361,14 @@ export default function TeacherExams() {
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {(viewData.questions ?? []).map((q: any, i: number) => (
-                <div key={q.id} className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50">
-                  <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                <div key={q.id} className="flex items-start gap-3 p-3 bg-[var(--surface-2)]">
+                  <span className="w-6 h-6 bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
                   <div>
                     <p className="text-sm text-slate-700 line-clamp-2">{q.enunciado}</p>
                     <div className="flex gap-2 mt-1">
-                      <span className="text-[10px] text-slate-400">{AREA_LABELS[q.area as QuestionArea]}</span>
+                      <span className="text-[10px] text-[var(--text-subtle)]">{AREA_LABELS[q.area as QuestionArea]}</span>
                       <span className="text-[10px] text-slate-300">·</span>
-                      <span className="text-[10px] text-slate-400">Dif. {q.difficulty}</span>
+                      <span className="text-[10px] text-[var(--text-subtle)]">Dif. {q.difficulty}</span>
                     </div>
                   </div>
                 </div>

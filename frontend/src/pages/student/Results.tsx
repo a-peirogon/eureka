@@ -20,15 +20,15 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
   const [expanded, setExpanded] = useState(false)
   return (
     <div className={clsx(
-      'border-2 rounded-2xl overflow-hidden transition-all',
+      'border-2 overflow-hidden transition-all',
       ans.is_correct ? 'border-emerald-200' : 'border-red-200'
     )}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-4 p-4 text-left hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center gap-4 p-4 text-left hover:bg-[var(--surface-2)] transition-colors"
       >
         <div className={clsx(
-          'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold',
+          'w-8 h-8 flex items-center justify-center flex-shrink-0 text-sm font-bold',
           ans.is_correct ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
         )}>
           {index + 1}
@@ -42,25 +42,25 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
             ? <CheckCircle2 size={18} className="text-emerald-500" />
             : <XCircle size={18} className="text-red-500" />
           }
-          {expanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+          {expanded ? <ChevronUp size={16} className="text-[var(--text-subtle)]" /> : <ChevronDown size={16} className="text-[var(--text-subtle)]" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-slate-100">
+        <div className="px-4 pb-4 border-t border-[var(--border)]">
           {/* Options */}
           <div className="space-y-2 mt-4">
             {ans.opciones?.map((opt: any) => (
               <div key={opt.letra} className={clsx(
-                'flex items-start gap-3 p-3 rounded-2xl text-sm',
+                'flex items-start gap-3 p-3 text-sm',
                 opt.letra === ans.respuesta_correcta
                   ? 'bg-emerald-50 border border-emerald-200'
                   : opt.letra === ans.respuesta_dada && !ans.is_correct
                   ? 'bg-red-50 border border-red-200'
-                  : 'bg-slate-50 border border-transparent'
+                  : 'bg-[var(--surface-2)] border border-transparent'
               )}>
                 <span className={clsx(
-                  'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold',
+                  'w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold',
                   opt.letra === ans.respuesta_correcta
                     ? 'bg-emerald-500 text-white'
                     : opt.letra === ans.respuesta_dada
@@ -78,7 +78,7 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
           </div>
 
           {ans.explicacion && (
-            <div className="mt-4 p-4 bg-blue-600 rounded-2xl border border-blue-400">
+            <div className="mt-4 p-4 bg-blue-600 border border-blue-400">
               <p className="text-xs font-semibold text-blue-600 mb-1">💡 Explicación</p>
               <p className="text-sm text-slate-700">{ans.explicacion}</p>
             </div>
@@ -134,30 +134,30 @@ export default function StudentResults() {
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="text-center">
             <ScoreRing score={result.score_global} size={120} />
-            <p className="text-sm text-slate-500 mt-2">Puntaje Global</p>
+            <p className="text-sm text-[var(--text-muted)] mt-2">Puntaje Global</p>
           </div>
 
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-emerald-50 rounded-2xl">
+            <div className="text-center p-4 bg-emerald-50">
               <p className="text-2xl font-bold text-emerald-700">
                 {result.answers?.filter((a: any) => a.is_correct).length}
               </p>
-              <p className="text-xs text-slate-500">Correctas</p>
+              <p className="text-xs text-[var(--text-muted)]">Correctas</p>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-2xl">
+            <div className="text-center p-4 bg-red-50">
               <p className="text-2xl font-bold text-red-600">
                 {result.answers?.filter((a: any) => !a.is_correct).length}
               </p>
-              <p className="text-xs text-slate-500">Incorrectas</p>
+              <p className="text-xs text-[var(--text-muted)]">Incorrectas</p>
             </div>
-            <div className="text-center p-4 bg-slate-50 rounded-2xl">
-              <p className="text-2xl font-bold text-slate-900">{result.answers?.length}</p>
-              <p className="text-xs text-slate-500">Total</p>
+            <div className="text-center p-4 bg-[var(--surface-2)]">
+              <p className="text-2xl font-bold text-[var(--text)]">{result.answers?.length}</p>
+              <p className="text-xs text-[var(--text-muted)]">Total</p>
             </div>
             {result.time_spent_sec && (
-              <div className="text-center p-4 bg-blue-50 rounded-2xl">
+              <div className="text-center p-4 bg-blue-50">
                 <p className="text-2xl font-bold text-blue-700">{fmt(result.time_spent_sec)}</p>
-                <p className="text-xs text-slate-500">Tiempo</p>
+                <p className="text-xs text-[var(--text-muted)]">Tiempo</p>
               </div>
             )}
           </div>
@@ -179,7 +179,7 @@ export default function StudentResults() {
 
       {/* Score by area */}
       <div className="card mb-6">
-        <h3 className="font-semibold text-slate-900 mb-4">Puntaje por área</h3>
+        <h3 className="font-semibold text-[var(--text)] mb-4">Puntaje por área</h3>
         <div className="space-y-3">
           {Object.entries(result.score_by_area ?? {}).map(([area, pct]) => (
             <div key={area}>
@@ -203,7 +203,7 @@ export default function StudentResults() {
       {/* Answers list */}
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h3 className="font-semibold text-slate-900">Revisión de preguntas ({answers.length})</h3>
+          <h3 className="font-semibold text-[var(--text)]">Revisión de preguntas ({answers.length})</h3>
           <div className="flex gap-2 flex-wrap">
             {(['all', 'correct', 'wrong'] as const).map((f) => (
               <button

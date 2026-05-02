@@ -45,14 +45,14 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
 
   return (
     <div className={clsx(
-      'border-2 rounded-2xl overflow-hidden',
+      'border-2 overflow-hidden',
       q._saved ? 'border-emerald-300 bg-emerald-50/30'
       : q._error ? 'border-red-300'
-      : 'border-slate-200'
+      : 'border-[var(--border)]'
     )}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-100">
-        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+      <div className="flex items-center gap-3 px-4 py-3 bg-[var(--surface-2)] border-b border-[var(--border)]">
+        <div className="w-7 h-7 bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
           {index + 1}
         </div>
         <div className="flex gap-2">
@@ -67,10 +67,10 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
             <span className="badge badge-green flex items-center gap-1"><CheckCircle2 size={11} /> Guardada</span>
           ) : (
             <>
-              <button onClick={() => setEditing(!editing)} className="btn-ghost p-1.5 rounded-lg text-xs">
+              <button onClick={() => setEditing(!editing)} className="btn-ghost p-1.5 text-xs">
                 <Edit3 size={14} />
               </button>
-              <button onClick={onRemove} className="btn-ghost p-1.5 rounded-lg text-red-400 hover:bg-red-50">
+              <button onClick={onRemove} className="btn-ghost p-1.5 text-red-400 hover:bg-red-50">
                 <Trash2 size={14} />
               </button>
               <button onClick={handleSave} disabled={saving} className="btn-primary text-xs py-1.5 px-3">
@@ -89,13 +89,13 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {(['A','B','C','D'] as const).map((l) => (
                 <div key={l} className={clsx(
-                  'flex items-start gap-2 p-2.5 rounded-2xl text-xs',
+                  'flex items-start gap-2 p-2.5 text-xs',
                   l === local.respuesta_correcta
                     ? 'bg-emerald-50 border border-emerald-200'
-                    : 'bg-slate-50 border border-slate-100'
+                    : 'bg-[var(--surface-2)] border border-[var(--border)]'
                 )}>
                   <span className={clsx(
-                    'w-5 h-5 rounded-full flex items-center justify-center font-bold flex-shrink-0',
+                    'w-5 h-5 flex items-center justify-center font-bold flex-shrink-0',
                     l === local.respuesta_correcta ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'
                   )}>{l}</span>
                   <span>{local[`opcion_${l.toLowerCase()}` as keyof OCRQuestion] as string}</span>
@@ -138,10 +138,10 @@ function QuestionEditor({ q, index, onUpdate, onSave, onRemove }: {
                   type="button"
                   onClick={() => setLocal({...local, respuesta_correcta: l})}
                   className={clsx(
-                    'w-7 h-7 rounded-full border-2 flex items-center justify-center font-bold text-xs flex-shrink-0',
+                    'w-7 h-7 border-2 flex items-center justify-center font-bold text-xs flex-shrink-0',
                     local.respuesta_correcta === l
                       ? 'border-emerald-500 bg-emerald-500 text-white'
-                      : 'border-slate-300 text-slate-500'
+                      : 'border-slate-300 text-[var(--text-muted)]'
                   )}
                 >{l}</button>
                 <input className="input text-sm flex-1"
@@ -263,14 +263,14 @@ export default function TeacherImport() {
                 i > 0 && 'border-t-2 border-dashed pt-0',
               )}>
                 <div className={clsx(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
+                  'w-8 h-8 flex items-center justify-center text-sm font-bold flex-shrink-0',
                   (step === 'upload' && s.n === 1) || (step === 'review' && s.n <= 3) || (step === 'done')
                     ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-400'
+                    : 'bg-[var(--surface-2)] text-[var(--text-subtle)]'
                 )}>
                   {s.n}
                 </div>
-                <span className="text-xs text-slate-500 hidden sm:block">{s.label}</span>
+                <span className="text-xs text-[var(--text-muted)] hidden sm:block">{s.label}</span>
               </div>
               {i < arr.length - 1 && <div className="w-8 h-0.5 bg-slate-200 flex-shrink-0" />}
             </div>
@@ -282,7 +282,7 @@ export default function TeacherImport() {
         {/* Upload panel */}
         <div className="lg:col-span-2 space-y-4">
           <div className="card">
-            <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-[var(--text)] mb-4 flex items-center gap-2">
               <Upload size={16} /> Subir archivo
             </h3>
 
@@ -291,8 +291,8 @@ export default function TeacherImport() {
               onDragOver={(e) => e.preventDefault()}
               onClick={() => fileRef.current?.click()}
               className={clsx(
-                'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
-                file ? 'border-blue-400 bg-blue-600' : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50'
+                'border-2 border-dashed p-8 text-center cursor-pointer transition-all',
+                file ? 'border-blue-400 bg-blue-600' : 'border-[var(--border)] hover:border-blue-400 hover:bg-[var(--surface-2)]'
               )}
             >
               <input
@@ -304,22 +304,22 @@ export default function TeacherImport() {
               {file ? (
                 <div>
                   <FileImage size={32} className="mx-auto text-blue-500 mb-2" />
-                  <p className="text-sm font-medium text-slate-900">{file.name}</p>
-                  <p className="text-xs text-slate-400 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
+                  <p className="text-sm font-medium text-[var(--text)]">{file.name}</p>
+                  <p className="text-xs text-[var(--text-subtle)] mt-1">{(file.size / 1024).toFixed(0)} KB</p>
                 </div>
               ) : (
                 <div>
                   <Upload size={32} className="mx-auto text-slate-300 mb-3" />
                   <p className="text-sm font-medium text-slate-600">Arrastra o haz clic</p>
-                  <p className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP, PDF</p>
+                  <p className="text-xs text-[var(--text-subtle)] mt-1">JPG, PNG, WEBP, PDF</p>
                 </div>
               )}
             </div>
 
             {/* Preview */}
             {preview && (
-              <div className="mt-3 rounded-2xl overflow-hidden border border-slate-200">
-                <img src={preview} alt="Vista previa" className="w-full max-h-48 object-contain bg-slate-50" />
+              <div className="mt-3 overflow-hidden border border-[var(--border)]">
+                <img src={preview} alt="Vista previa" className="w-full max-h-48 object-contain bg-[var(--surface-2)]" />
               </div>
             )}
 
@@ -345,7 +345,7 @@ export default function TeacherImport() {
           </div>
 
           {/* How it works */}
-          <div className="card bg-slate-50 border-slate-200">
+          <div className="card bg-[var(--surface-2)] border-[var(--border)]">
             <h4 className="font-semibold text-slate-700 mb-3 text-sm">¿Cómo funciona?</h4>
             <ol className="space-y-2">
               {[
@@ -355,8 +355,8 @@ export default function TeacherImport() {
                 'Revisa y edita antes de guardar',
                 'Las preguntas quedan como borradores',
               ].map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-slate-500">
-                  <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                <li key={i} className="flex items-start gap-2 text-xs text-[var(--text-muted)]">
+                  <span className="w-4 h-4 bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   {s}
@@ -371,7 +371,7 @@ export default function TeacherImport() {
               <h4 className="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
                 <FileText size={14} /> Texto OCR detectado
               </h4>
-              <p className="text-xs text-slate-500 font-mono bg-slate-50 p-3 rounded-2xl max-h-32 overflow-y-auto whitespace-pre-wrap">
+              <p className="text-xs text-[var(--text-muted)] font-mono bg-[var(--surface-2)] p-3 max-h-32 overflow-y-auto whitespace-pre-wrap">
                 {ocrText}
               </p>
             </div>
@@ -384,7 +384,7 @@ export default function TeacherImport() {
             <div className="card h-full flex items-center justify-center min-h-[400px]">
               <div className="text-center">
                 <FileImage size={48} className="mx-auto text-slate-200 mb-4" />
-                <p className="text-slate-400 font-medium">Sube un archivo para comenzar</p>
+                <p className="text-[var(--text-subtle)] font-medium">Sube un archivo para comenzar</p>
                 <p className="text-xs text-slate-300 mt-1">Las preguntas extraídas aparecerán aquí</p>
               </div>
             </div>
@@ -394,10 +394,10 @@ export default function TeacherImport() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-slate-900">
+                  <h3 className="font-semibold text-[var(--text)]">
                     {questions.length} pregunta(s) detectada(s)
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-[var(--text-subtle)] mt-0.5">
                     {savedCount} guardada(s) · {questions.length - savedCount} pendiente(s)
                   </p>
                 </div>
@@ -414,7 +414,7 @@ export default function TeacherImport() {
                   <div className="text-center py-8">
                     <AlertTriangle size={32} className="mx-auto text-amber-400 mb-3" />
                     <p className="text-slate-600 font-medium">No se detectaron preguntas</p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-[var(--text-subtle)] mt-1">
                       Intenta con una imagen más clara o con mejor contraste.
                     </p>
                   </div>
@@ -436,11 +436,11 @@ export default function TeacherImport() {
 
           {step === 'done' && (
             <div className="card text-center py-12">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={32} className="text-emerald-600" />
               </div>
-              <h3 className="font-display text-xl text-slate-900 mb-2">¡Importación completada!</h3>
-              <p className="text-slate-500 text-sm mb-6">
+              <h3 className="font-display text-xl text-[var(--text)] mb-2">¡Importación completada!</h3>
+              <p className="text-[var(--text-muted)] text-sm mb-6">
                 {savedCount} pregunta(s) guardadas como borradores en el banco de preguntas.
               </p>
               <div className="flex gap-3 justify-center">
