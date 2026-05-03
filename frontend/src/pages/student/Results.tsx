@@ -2,11 +2,12 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   CheckCircle2, XCircle, ArrowLeft, BarChart3,
-  Clock, Flag, BookOpen, ChevronDown, ChevronUp
+  Clock, Flag, BookOpen, ChevronDown, ChevronUp,
+  ExternalLink, Lightbulb,
 } from 'lucide-react'
 import { useState } from 'react'
 import clsx from 'clsx'
-import { examsApi } from '@/lib/api'
+import { examsApi, analyticsApi } from '@/lib/api'
 import { AppLayout, ScoreRing, LoadingPage, AreaBadge, ProgressBar, EmptyState } from '@/components/ui'
 import { AREA_LABELS, AREA_COLORS, type QuestionArea } from '@/types'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
@@ -15,6 +16,229 @@ function fmt(s: number) {
   const m = Math.floor(s / 60), sec = s % 60
   return `${m}m ${sec}s`
 }
+
+// ── Content catalog ────────────────────────────────────────────────────────
+// Mirror of the backend CONTENT_CATALOG. The Results page uses this directly
+// from the attempt's score_by_area to avoid an extra network request.
+// Keep in sync with backend/app/api/analytics.py → CONTENT_CATALOG.
+
+type Resource = {
+  plataforma: 'khan_academy' | 'youtube' | 'duolingo'
+  titulo: string
+  descripcion: string
+  url: string
+}
+
+const RESOURCES: Record<string, Resource[]> = {
+  matematicas: [
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Estadística y probabilidad',
+      descripcion: 'Distribuciones, probabilidad condicional y estadística descriptiva.',
+      url: 'https://es.khanacademy.org/math/estadistica-y-probabilidad',
+    },
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Álgebra — funciones y ecuaciones',
+      descripcion: 'Ecuaciones de primer y segundo grado, funciones y sistemas.',
+      url: 'https://es.khanacademy.org/math/algebra',
+    },
+    {
+      plataforma: 'youtube',
+      titulo: 'Unicoos — Matemáticas',
+      descripcion: 'Vídeos cortos de álgebra, geometría analítica y cálculo diferencial.',
+      url: 'https://www.youtube.com/@unicoos',
+    },
+  ],
+  lectura_critica: [
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Comprensión lectora',
+      descripcion: 'Estrategias para identificar idea central, inferir y analizar argumentos.',
+      url: 'https://es.khanacademy.org/ela/cc-reading-lit',
+    },
+    {
+      plataforma: 'youtube',
+      titulo: 'Seprofe — Lectura Crítica ICFES',
+      descripcion: 'Canal colombiano con ejercicios específicos para la prueba de lectura crítica.',
+      url: 'https://www.youtube.com/@seprofe',
+    },
+  ],
+  ciencias_naturales: [
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Biología',
+      descripcion: 'Célula, genética, evolución, ecología y fisiología.',
+      url: 'https://es.khanacademy.org/science/biologia',
+    },
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Química general',
+      descripcion: 'Tabla periódica, enlace químico, reacciones y estequiometría.',
+      url: 'https://es.khanacademy.org/science/quimica-organica',
+    },
+    {
+      plataforma: 'youtube',
+      titulo: 'Unicoos — Física y Química',
+      descripcion: 'Cinemática, termodinámica, electricidad y química inorgánica.',
+      url: 'https://www.youtube.com/@unicoos',
+    },
+  ],
+  sociales_ciudadanas: [
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Civismo y gobierno',
+      descripcion: 'Sistemas democráticos, derechos fundamentales y participación ciudadana.',
+      url: 'https://es.khanacademy.org/humanities/civics',
+    },
+    {
+      plataforma: 'youtube',
+      titulo: 'Guía ICFES — Sociales y Ciudadanas',
+      descripcion: 'Revisión de la guía oficial del ICFES con los conceptos clave de la prueba.',
+      url: 'https://www.youtube.com/results?search_query=ICFES+sociales+ciudadanas+guia',
+    },
+  ],
+  ingles: [
+    {
+      plataforma: 'khan_academy',
+      titulo: 'Inglés — Reading & Grammar',
+      descripcion: 'Comprensión de textos, gramática y vocabulario en contexto.',
+      url: 'https://www.khanacademy.org/ela/cc-reading-lit',
+    },
+    {
+      plataforma: 'youtube',
+      titulo: 'English with Lucy',
+      descripcion: 'Gramática, pronunciación y comprensión auditiva en inglés real.',
+      url: 'https://www.youtube.com/@EnglishwithLucy',
+    },
+    {
+      plataforma: 'duolingo',
+      titulo: 'Duolingo — Inglés',
+      descripcion: 'Práctica diaria de vocabulario y gramática en formato gamificado.',
+      url: 'https://www.duolingo.com/course/en/es/Learn-English',
+    },
+  ],
+}
+
+const PLATFORM_META: Record<string, { label: string; bg: string; text: string }> = {
+  khan_academy: { label: 'Khan Academy', bg: 'bg-green-100',  text: 'text-green-700' },
+  youtube:      { label: 'YouTube',       bg: 'bg-red-100',   text: 'text-red-600'   },
+  duolingo:     { label: 'Duolingo',      bg: 'bg-blue-100',  text: 'text-blue-700'  },
+}
+
+// ── RecommendationPanel ────────────────────────────────────────────────────
+
+function RecommendationPanel({
+  scoreByArea,
+  attemptId,
+}: {
+  scoreByArea: Record<string, number>
+  attemptId: string
+}) {
+  // Find areas below 70%, sorted worst first. Cap at 3.
+  const weak = Object.entries(scoreByArea)
+    .filter(([, score]) => score < 70)
+    .sort(([, a], [, b]) => a - b)
+    .slice(0, 3)
+
+  if (weak.length === 0) return null
+
+  function handleOpen(area: string, resource: Resource) {
+    // Fire-and-forget tracking; never blocks the user
+    analyticsApi.trackRecommendation({
+      area,
+      plataforma: resource.plataforma,
+      url: resource.url,
+      attempt_id: attemptId,
+    })
+    window.open(resource.url, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <div className="card mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Lightbulb size={18} className="text-amber-500 flex-shrink-0" />
+        <h3 className="font-semibold text-[var(--text)]">¿Qué estudiar ahora?</h3>
+        <span className="ml-auto text-xs text-[var(--text-muted)]">
+          Basado en este simulacro
+        </span>
+      </div>
+
+      <div className="space-y-5">
+        {weak.map(([area, score]) => {
+          const recursos = (RESOURCES[area] ?? []).slice(0, 2)
+          if (recursos.length === 0) return null
+
+          const areaLabel = AREA_LABELS[area as QuestionArea] ?? area
+          const prioridad = score < 40 ? 'alta' : score < 60 ? 'media' : 'baja'
+          const prioridadCfg = {
+            alta:  { label: 'Urgente',    bg: 'bg-red-100',    text: 'text-red-600'    },
+            media: { label: 'Importante', bg: 'bg-amber-100',  text: 'text-amber-700'  },
+            baja:  { label: 'Repasar',    bg: 'bg-blue-100',   text: 'text-blue-700'   },
+          }[prioridad]
+
+          return (
+            <div key={area}>
+              {/* Area header */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium text-[var(--text)]">{areaLabel}</span>
+                <span className={clsx(
+                  'text-xs font-medium px-2 py-0.5 rounded-full',
+                  prioridadCfg.bg, prioridadCfg.text
+                )}>
+                  {prioridadCfg.label}
+                </span>
+                <span className={clsx(
+                  'ml-auto text-sm font-semibold',
+                  score < 40 ? 'text-red-500' : score < 60 ? 'text-amber-600' : 'text-blue-600'
+                )}>
+                  {score.toFixed(1)}%
+                </span>
+              </div>
+
+              {/* Resource cards */}
+              <div className="space-y-2">
+                {recursos.map((r) => {
+                  const platform = PLATFORM_META[r.plataforma] ?? {
+                    label: r.plataforma, bg: 'bg-slate-100', text: 'text-slate-700',
+                  }
+                  return (
+                    <button
+                      key={r.url}
+                      onClick={() => handleOpen(area, r)}
+                      className="w-full flex items-start gap-3 p-3 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border)] transition-colors text-left"
+                    >
+                      <span className={clsx(
+                        'text-xs font-semibold px-2 py-1 rounded flex-shrink-0 mt-0.5',
+                        platform.bg, platform.text
+                      )}>
+                        {platform.label}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[var(--text)] truncate">
+                          {r.titulo}
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">
+                          {r.descripcion}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={14}
+                        className="text-[var(--text-subtle)] flex-shrink-0 mt-1"
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── AnswerCard ─────────────────────────────────────────────────────────────
 
 function AnswerCard({ ans, index }: { ans: any; index: number }) {
   const [expanded, setExpanded] = useState(false)
@@ -88,6 +312,8 @@ function AnswerCard({ ans, index }: { ans: any; index: number }) {
     </div>
   )
 }
+
+// ── Page ───────────────────────────────────────────────────────────────────
 
 export default function StudentResults() {
   const { examId, attemptId } = useParams<{ examId: string; attemptId: string }>()
@@ -199,6 +425,14 @@ export default function StudentResults() {
           ))}
         </div>
       </div>
+
+      {/* Recommendations — only rendered when there are weak areas */}
+      {result.score_by_area && attemptId && (
+        <RecommendationPanel
+          scoreByArea={result.score_by_area}
+          attemptId={attemptId}
+        />
+      )}
 
       {/* Answers list */}
       <div className="card">

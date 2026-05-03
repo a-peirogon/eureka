@@ -63,8 +63,126 @@ def get_gemini_client():
     return _gemini_client
 
 
-async def call_ai_json(prompt: str, system: str) -> tuple[dict, int]:
-    """Call the configured AI provider and return parsed JSON + token count."""
+def _recover_partial_questions(text: str) -> dict:
+    """
+    Fallback for token-limit truncation: extract any complete question objects
+    from an otherwise unparseable AI response.
+    Scans for JSON objects containing "enunciado" that closed properly.
+    """
+    questions, search_from = [], 0
+    while True:
+        key_pos = text.find('"enunciado"', search_from)
+        if key_pos == -1:
+            break
+        brace = text.rfind('{', 0, key_pos)
+        if brace == -1:
+            search_from = key_pos + 1
+            continue
+        depth, in_str, esc = 1, False, False
+        j = brace + 1
+        while j < len(text) and depth > 0:
+            ch = text[j]
+            if esc:
+                esc = False
+            elif ch == '\\' and in_str:
+                esc = True
+            elif ch == '"':
+                in_str = not in_str
+            elif not in_str:
+                if ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+            j += 1
+        if depth == 0:
+            try:
+                obj = json.loads(text[brace:j])
+                if isinstance(obj, dict) and 'enunciado' in obj:
+                    questions.append(obj)
+                search_from = j
+            except json.JSONDecodeError:
+                search_from = key_pos + 11
+        else:
+            break  # truncated — stop
+    return {"preguntas_encontradas": questions, "total_encontradas": len(questions)}
+
+
+def _robust_json_parse(text: str) -> dict:
+    """
+    Parse JSON from an AI response that may be:
+      - wrapped in markdown fences
+      - truncated mid-string (token limit hit inside a string value)
+      - truncated after the last complete object (trailing garbage)
+
+    Falls back to partial question recovery when full parsing fails.
+    Raises json.JSONDecodeError only if nothing can be recovered.
+    """
+    text = text.strip()
+
+    # 1. Strip markdown fences
+    if text.startswith("```"):
+        parts = text.split("```")
+        inner = parts[1] if len(parts) > 1 else text
+        text = inner[4:].strip() if inner.startswith("json") else inner.strip()
+
+    # 2. Direct parse (happy path)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # 3. Trailing garbage — find the outermost complete {…} by brace counting
+    depth, start_i, end_i = 0, -1, -1
+    in_str, esc = False, False
+    for i, ch in enumerate(text):
+        if esc:
+            esc = False
+            continue
+        if ch == '\\' and in_str:
+            esc = True
+            continue
+        if ch == '"':
+            in_str = not in_str
+            continue
+        if in_str:
+            continue
+        if ch == '{':
+            if depth == 0:
+                start_i = i
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end_i = i
+                break
+    if start_i != -1 and end_i != -1:
+        try:
+            return json.loads(text[start_i:end_i + 1])
+        except json.JSONDecodeError:
+            pass
+
+    # 4. Mid-string truncation — salvage any complete question objects
+    partial = _recover_partial_questions(text)
+    if partial["total_encontradas"] > 0:
+        return partial
+
+    # 5. Nothing recoverable
+    raise json.JSONDecodeError(
+        f"No valid JSON found in AI response (first 200 chars): {text[:200]}",
+        text, 0,
+    )
+
+
+async def call_ai_json(
+    prompt: str,
+    system: str,
+    max_tokens: int = 1500,
+) -> tuple[dict, int]:
+    """Call the configured AI provider and return parsed JSON + token count.
+
+    Args:
+        max_tokens: Increase to 4000 for OCR requests that produce long responses.
+    """
     provider = get_ai_provider()
 
     if provider == "openai":
@@ -76,31 +194,27 @@ async def call_ai_json(prompt: str, system: str) -> tuple[dict, int]:
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=1500,
+            max_tokens=max_tokens,
             temperature=0.7,
         )
-        content = response.choices[0].message.content
         tokens = response.usage.total_tokens
-        return json.loads(content), tokens
+        return _robust_json_parse(response.choices[0].message.content), tokens
 
     elif provider == "anthropic":
         client = get_anthropic_client()
-        # Anthropic doesn't have a native JSON mode — instruct via prompt
-        full_system = system + "\n\nIMPORTANTE: Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin bloques de código, sin explicaciones."
+        full_system = (
+            system
+            + "\n\nIMPORTANTE: Responde ÚNICAMENTE con JSON válido, "
+            "sin texto adicional, sin bloques de código, sin explicaciones."
+        )
         response = await client.messages.create(
             model=settings.ANTHROPIC_MODEL,
-            max_tokens=1500,
+            max_tokens=max_tokens,
             system=full_system,
             messages=[{"role": "user", "content": prompt}],
         )
-        content = response.content[0].text.strip()
-        # Strip potential markdown code fences
-        if content.startswith("```"):
-            content = content.split("```")[1]
-            if content.startswith("json"):
-                content = content[4:]
         tokens = response.usage.input_tokens + response.usage.output_tokens
-        return json.loads(content), tokens
+        return _robust_json_parse(response.content[0].text.strip()), tokens
 
     elif provider == "gemini":
         import asyncio
@@ -110,30 +224,18 @@ async def call_ai_json(prompt: str, system: str) -> tuple[dict, int]:
             model_name=settings.GEMINI_MODEL,
             generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
-                max_output_tokens=2048,
+                max_output_tokens=max_tokens,
                 temperature=0.7,
             ),
-            system_instruction=system + "\n\nResponde ÚNICAMENTE con JSON válido y completo. No cortes la respuesta.",
+            system_instruction=(
+                system
+                + "\n\nResponde ÚNICAMENTE con JSON válido y completo. No cortes la respuesta."
+            ),
         )
         loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(
-            None, lambda: model.generate_content(prompt)
-        )
-        content = response.text.strip()
-        # Strip markdown fences if present
-        if content.startswith("```"):
-            parts = content.split("```")
-            content = parts[1] if len(parts) > 1 else content
-            if content.startswith("json"):
-                content = content[4:]
-            content = content.strip()
-        # Attempt to fix truncated JSON by finding last complete object
-        if not content.endswith("}"):
-            last_brace = content.rfind("}")
-            if last_brace != -1:
-                content = content[:last_brace + 1]
+        response = await loop.run_in_executor(None, lambda: model.generate_content(prompt))
         tokens = getattr(response.usage_metadata, "total_token_count", 0)
-        return json.loads(content), tokens
+        return _robust_json_parse(response.text.strip()), tokens
 
     raise HTTPException(500, f"Proveedor no soportado: {provider}")
 
@@ -448,31 +550,38 @@ async def ocr_import(
     if not ocr_text.strip():
         raise HTTPException(422, "No se pudo extraer texto de la imagen")
 
-    system = (
-        "Eres experto en OCR educativo para ICFES. Extrae preguntas del texto OCR. "
-        "Responde en JSON."
+    # Sanitize before embedding: raw OCR contains quotes and control chars
+    # that break JSON when the model echoes them back inside a string field.
+    import re as _re
+    clean_ocr = _re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', ocr_text)
+    clean_ocr = clean_ocr.replace('\\', ' ').replace('"', "'").replace('\r', '')
+    clean_ocr = _re.sub(r'\n{3,}', '\n\n', clean_ocr).strip()
+
+    # ── Pass 1: plain-text extraction ─────────────────────────────────────
+    # Ask the model to identify questions as numbered plain text — no JSON yet.
+    # This avoids the main failure mode: the model forgetting to escape quotes
+    # inside JSON string values, which produces unparseable output.
+    system_p1 = (
+        "Eres experto en lectura de exámenes ICFES. "
+        "Extrae el contenido de las preguntas tal como aparece, sin reformular."
     )
-    prompt = f"""Del siguiente texto extraído por OCR, identifica y estructura TODAS las preguntas de selección múltiple.
+    prompt_p1 = f"""El siguiente texto fue extraído por OCR de un documento con preguntas de examen.
+Lista TODAS las preguntas de selección múltiple que encuentres.
+
+Para cada pregunta usa exactamente este formato de texto plano:
+---
+PREGUNTA: <enunciado completo>
+A: <texto opción A>
+B: <texto opción B>
+C: <texto opción C>
+D: <texto opción D>
+CORRECTA: <A|B|C|D o DESCONOCIDA>
+---
 
 TEXTO OCR:
-{ocr_text[:3000]}
+{clean_ocr[:4000]}
 
-Para cada pregunta encontrada, responde con este formato JSON:
-{{
-  "preguntas_encontradas": [
-    {{
-      "enunciado": "texto de la pregunta",
-      "opcion_a": "...", "opcion_b": "...", "opcion_c": "...", "opcion_d": "...",
-      "respuesta_correcta": "A|B|C|D o null si no aparece",
-      "area": "matematicas|lectura_critica|sociales_ciudadanas|ciencias_naturales|ingles",
-      "difficulty": "1|2|3|4|5",
-      "latex_content": "fórmulas LaTeX detectadas si las hay",
-      "tiene_imagen": false
-    }}
-  ],
-  "total_encontradas": 0,
-  "texto_crudo": "texto OCR limpiado"
-}}"""
+Responde SOLO con el listado en el formato indicado. Nada más."""
 
     job = AIJob(
         requester_id=current_user.id,
@@ -485,18 +594,91 @@ Para cada pregunta encontrada, responde con este formato JSON:
     await db.flush()
 
     try:
-        result, tokens = await call_ai_json(prompt, system)
+        provider = get_ai_provider()
+        # Pass 1: get plain text — no JSON parsing, just raw text output
+        if provider == "openai":
+            p1_resp = await get_openai_client().chat.completions.create(
+                model=settings.OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": system_p1},
+                    {"role": "user",   "content": prompt_p1},
+                ],
+                max_tokens=4000,
+                temperature=0.2,
+            )
+            extracted_text = p1_resp.choices[0].message.content or ""
+            p1_tokens = p1_resp.usage.total_tokens
+        elif provider == "anthropic":
+            p1_resp = await get_anthropic_client().messages.create(
+                model=settings.ANTHROPIC_MODEL,
+                max_tokens=4000,
+                system=system_p1,
+                messages=[{"role": "user", "content": prompt_p1}],
+            )
+            extracted_text = p1_resp.content[0].text or ""
+            p1_tokens = p1_resp.usage.input_tokens + p1_resp.usage.output_tokens
+        else:  # gemini
+            import asyncio
+            import google.generativeai as genai
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            gmodel = genai.GenerativeModel(
+                model_name=settings.GEMINI_MODEL,
+                system_instruction=system_p1,
+            )
+            loop = asyncio.get_event_loop()
+            p1_resp = await loop.run_in_executor(None, lambda: gmodel.generate_content(prompt_p1))
+            extracted_text = p1_resp.text or ""
+            p1_tokens = getattr(p1_resp.usage_metadata, "total_token_count", 0)
+
+        if not extracted_text.strip():
+            raise ValueError("El modelo no encontró preguntas en el texto OCR")
+
+        # ── Pass 2: structure as JSON ───────────────────────────────────────
+        # The extracted_text now has clean prose — no raw OCR garbage.
+        # Converting prose→JSON is much less likely to produce malformed output.
+        system_p2 = (
+            "Conviertes texto estructurado de preguntas ICFES a JSON. "
+            "Responde ÚNICAMENTE con JSON válido."
+        )
+        prompt_p2 = f"""Convierte este listado de preguntas al formato JSON indicado.
+El texto ya viene limpio: copia los valores exactamente, no los reformules.
+
+PREGUNTAS:
+{extracted_text[:5000]}
+
+JSON de salida (un objeto por pregunta, dentro del array):
+{{
+  "preguntas_encontradas": [
+    {{
+      "enunciado": "texto exacto del enunciado",
+      "opcion_a": "texto exacto",
+      "opcion_b": "texto exacto",
+      "opcion_c": "texto exacto",
+      "opcion_d": "texto exacto",
+      "respuesta_correcta": "A|B|C|D|null",
+      "area": "matematicas|lectura_critica|sociales_ciudadanas|ciencias_naturales|ingles",
+      "difficulty": "1|2|3|4|5",
+      "latex_content": null,
+      "tiene_imagen": false
+    }}
+  ],
+  "total_encontradas": 0
+}}"""
+
+        result, p2_tokens = await call_ai_json(prompt_p2, system_p2, max_tokens=4000)
+
+        total_tokens = p1_tokens + p2_tokens
         job.status = AIJobStatus.completado
         job.output_data = result
-        job.tokens_used = tokens
+        job.tokens_used = total_tokens
         job.finished_at = datetime.utcnow()
         await db.commit()
 
         return {
-            "job_id": str(job.id),
+            "job_id":   str(job.id),
             "ocr_text": ocr_text[:500] + "..." if len(ocr_text) > 500 else ocr_text,
             "preguntas": result.get("preguntas_encontradas", []),
-            "total": result.get("total_encontradas", 0),
+            "total":    result.get("total_encontradas", 0),
         }
     except Exception as e:
         job.status = AIJobStatus.fallido

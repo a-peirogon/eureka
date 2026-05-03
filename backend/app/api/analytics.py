@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, desc, text
 from pydantic import BaseModel
+import logging
 
 from app.core.database import get_db
 from app.domain.models import (
@@ -14,6 +15,133 @@ from app.domain.models import (
 from app.api.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
+logger = logging.getLogger(__name__)
+
+
+# ── Content catalog ────────────────────────────────────────────────────────
+# Mapa de recursos externos por área ICFES.
+# Añadir o reemplazar entradas aquí a medida que se validen con los estudiantes.
+
+CONTENT_CATALOG: dict[str, list[dict]] = {
+    "matematicas": [
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Estadística y probabilidad",
+            "descripcion": "Distribuciones, probabilidad condicional y estadística descriptiva.",
+            "url": "https://es.khanacademy.org/math/estadistica-y-probabilidad",
+        },
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Álgebra — funciones y ecuaciones",
+            "descripcion": "Ecuaciones de primer y segundo grado, funciones y sistemas.",
+            "url": "https://es.khanacademy.org/math/algebra",
+        },
+        {
+            "plataforma": "youtube",
+            "titulo": "Unicoos — Matemáticas",
+            "descripcion": "Vídeos cortos de álgebra, geometría analítica y cálculo diferencial.",
+            "url": "https://www.youtube.com/@unicoos",
+        },
+    ],
+    "lectura_critica": [
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Comprensión lectora",
+            "descripcion": "Estrategias para identificar idea central, inferir y analizar argumentos.",
+            "url": "https://es.khanacademy.org/ela/cc-reading-lit",
+        },
+        {
+            "plataforma": "youtube",
+            "titulo": "Seprofe — Lectura Crítica ICFES",
+            "descripcion": "Canal colombiano con ejercicios específicos para la prueba de lectura crítica.",
+            "url": "https://www.youtube.com/@seprofe",
+        },
+    ],
+    "ciencias_naturales": [
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Biología",
+            "descripcion": "Célula, genética, evolución, ecología y fisiología.",
+            "url": "https://es.khanacademy.org/science/biologia",
+        },
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Química general",
+            "descripcion": "Tabla periódica, enlace químico, reacciones y estequiometría.",
+            "url": "https://es.khanacademy.org/science/quimica-organica",
+        },
+        {
+            "plataforma": "youtube",
+            "titulo": "Unicoos — Física y Química",
+            "descripcion": "Cinemática, termodinámica, electricidad y química inorgánica.",
+            "url": "https://www.youtube.com/@unicoos",
+        },
+    ],
+    "sociales_ciudadanas": [
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Civismo y gobierno",
+            "descripcion": "Sistemas democráticos, derechos fundamentales y participación ciudadana.",
+            "url": "https://es.khanacademy.org/humanities/civics",
+        },
+        {
+            "plataforma": "youtube",
+            "titulo": "Guía ICFES — Sociales y Ciudadanas",
+            "descripcion": "Revisión de la guía oficial del ICFES con los conceptos clave de la prueba.",
+            "url": "https://www.youtube.com/results?search_query=ICFES+sociales+ciudadanas+guia",
+        },
+    ],
+    "ingles": [
+        {
+            "plataforma": "khan_academy",
+            "titulo": "Inglés — Reading & Grammar",
+            "descripcion": "Comprensión de textos, gramática y vocabulario en contexto.",
+            "url": "https://www.khanacademy.org/ela/cc-reading-lit",
+        },
+        {
+            "plataforma": "youtube",
+            "titulo": "English with Lucy",
+            "descripcion": "Gramática, pronunciación y comprensión auditiva en inglés real.",
+            "url": "https://www.youtube.com/@EnglishwithLucy",
+        },
+        {
+            "plataforma": "duolingo",
+            "titulo": "Duolingo — Inglés",
+            "descripcion": "Práctica diaria de vocabulario y gramática en formato gamificado.",
+            "url": "https://www.duolingo.com/course/en/es/Learn-English",
+        },
+    ],
+}
+
+_AREA_LABELS = {
+    "matematicas": "Matemáticas",
+    "lectura_critica": "Lectura Crítica",
+    "ciencias_naturales": "Ciencias Naturales",
+    "sociales_ciudadanas": "Sociales y Ciudadanas",
+    "ingles": "Inglés",
+}
+
+
+def _area_label(area: str) -> str:
+    return _AREA_LABELS.get(area, area.replace("_", " ").title())
+
+
+def _prioridad(score: float) -> str:
+    if score < 40:
+        return "alta"
+    if score < 60:
+        return "media"
+    return "baja"
+
+
+# ── Schemas ────────────────────────────────────────────────────────────────
+
+class RecommendationTrackIn(BaseModel):
+    area: str
+    plataforma: str
+    url: str
+    # Opcionalmente puede venir del intento actual
+    attempt_id: Optional[UUID] = None
 
 
 # ── Student Analytics ──────────────────────────────────────────────────────
@@ -127,6 +255,94 @@ def _weekly_summary(attempts: list) -> dict:
         "simulacros": len(week_attempts),
         "promedio": round(sum(scores) / len(scores), 1) if scores else None,
     }
+
+
+# ── Recommendations ────────────────────────────────────────────────────────
+
+@router.get("/recommendations/me")
+async def my_recommendations(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Content recommendations based on the student's recent performance.
+
+    Uses the last 5 completed attempts to compute area averages and returns
+    resources for the 3 weakest areas, ordered by priority (lowest score first).
+    """
+    result = await db.execute(
+        select(Attempt)
+        .where(
+            and_(
+                Attempt.student_id == current_user.id,
+                Attempt.status == ExamStatus.completado,
+            )
+        )
+        .order_by(desc(Attempt.finished_at))
+        .limit(5)
+    )
+    attempts = result.scalars().all()
+
+    if not attempts:
+        return {
+            "tiene_datos": False,
+            "mensaje": "Completa tu primer simulacro para recibir recomendaciones personalizadas.",
+            "recomendaciones": [],
+        }
+
+    # Average score per area across recent attempts
+    por_area: dict[str, list[float]] = {}
+    for att in attempts:
+        if att.score_by_area:
+            for area, pct in att.score_by_area.items():
+                por_area.setdefault(area, []).append(float(pct))
+
+    area_avgs = {k: round(sum(v) / len(v), 1) for k, v in por_area.items()}
+
+    # Up to 3 weakest areas with catalog resources
+    weakest = sorted(area_avgs.items(), key=lambda x: x[1])[:3]
+
+    recomendaciones = []
+    for area, score in weakest:
+        recursos = CONTENT_CATALOG.get(area)
+        if not recursos:
+            continue
+        recomendaciones.append({
+            "area": area,
+            "area_label": _area_label(area),
+            "score_promedio": score,
+            "prioridad": _prioridad(score),
+            "recursos": recursos[:2],
+        })
+
+    return {
+        "tiene_datos": True,
+        "total_simulacros_analizados": len(attempts),
+        "recomendaciones": recomendaciones,
+    }
+
+
+@router.post("/recommendations/track")
+async def track_recommendation_click(
+    body: RecommendationTrackIn,
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Log when a student opens a recommended resource.
+
+    Currently writes to the application log. Replace with a persistent
+    resource_interactions table once you want to measure impact over time
+    (e.g. correlation between resource opens and score improvement).
+    """
+    logger.info(
+        "recommendation_click user=%s area=%s platform=%s url=%s attempt=%s",
+        current_user.id,
+        body.area,
+        body.plataforma,
+        body.url,
+        body.attempt_id,
+    )
+    return {"ok": True}
 
 
 # ── Teacher / Course Analytics ─────────────────────────────────────────────
